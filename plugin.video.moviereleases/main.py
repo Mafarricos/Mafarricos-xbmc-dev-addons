@@ -15,7 +15,7 @@ cachePath			= os.path.join(dataPath,'cache')
 sitesfile 			= os.path.join(os.path.join(addonPath, 'resources'),'sites.txt')
 sitecachefile 		= os.path.join(cachePath,'_cache.txt')
 getSetting          = xbmcaddon.Addon().getSetting
-sites 				= ['http://irfree.com/movies/page/','http://sceper.ws/category/movies/page/','http://www.scnsrc.me/category/films/page/','http://rapidmoviez.com/l/m/']
+sites 				= ['http://irfree.com/movies/page/','http://sceper.ws/category/movies/page/','http://www.scnsrc.me/category/films/page/','http://www.rlslog.net/category/movies/bdrip/page/','http://www.rlslog.net/category/movies/dvdrip/page/','http://rapidmoviez.com/l/m/']
 
 if not os.path.exists(dataPath): os.makedirs(dataPath)
 if not os.path.exists(cachePath): os.makedirs(cachePath)

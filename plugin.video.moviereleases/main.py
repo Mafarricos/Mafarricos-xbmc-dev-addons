@@ -22,15 +22,20 @@ if not os.path.exists(cachePath): os.makedirs(cachePath)
 
 def MAIN(index):
 	addDir('Latest Releases','Latest Releases',3,'',True,1,'','','','')
+	addDir('IMDB','IMDB',4,'',True,1,'','','','')
+
+def IMDBmenu():
+	addDir('In Theaters','http://www.imdb.com/movies-in-theaters/',5,'',True,1,'','','','')
+	addDir('Comming Soon','http://www.imdb.com/movies-coming-soon/',5,'',True,1,'','','','')
+def IMDBlist(name,url):
+	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
+	results = getimdblinks(url,[],1,'IMDB')
+	populateDir(results,1)
 	
 def latestreleases(index):
 	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
-	unique_stuff = []
 	threads = []	
-	threads2 = []
 	results = []
-	list = []
-	order = 0
 	try: ranging = int(index)+1
 	except: 
 		ranging = 1
@@ -40,6 +45,14 @@ def latestreleases(index):
 	ranging = i
 	[i.start() for i in threads]
 	[i.join() for i in threads]
+	populateDir(results,ranging)
+	addDir('Next>>','Next>>',3,'',True,1,'',ranging,'','')		
+
+def populateDir(results,ranging):
+	unique_stuff = []
+	threads2 = []	
+	list = []
+	order = 0	
 	results = sorted(results, key=getKey)
 	for order,link in results:
 		if link not in str(unique_stuff): unique_stuff.append([order, link])
@@ -54,7 +67,6 @@ def latestreleases(index):
 			writefile(sitecachefile,"a",'::pageindex::'+str(ranging)+'::'+title.encode('ascii', 'xmlcharrefreplace')+'::\n')
 			addDir(title,title,2,poster,False,len(list),information,ranging,imdb_id,year)
 		elif '::pageindex::'+str(ranging)+'::'+title.encode('ascii', 'xmlcharrefreplace') in str(linecache): addDir(title,title,2,poster,False,len(list),information,ranging,imdb_id,year)
-	addDir('Next>>','Next>>',3,'',True,1,'',ranging,'','')		
 
 def populatelist(results,list):
 	for index,link in results:
@@ -89,13 +101,19 @@ def populatelist(results,list):
 			if getSetting('allyear') == 'true': list.append([index,jsondata['Title']+' ('+jsondata['Year']+')',jsondata['Poster'],informacao,ttcode[0],jsondata['Year']])
 			elif int(jsondata['Year']) >= int(getSetting('minyear')) and int(jsondata['Year']) <= int(getSetting('maxyear')): list.append([index,jsondata['Title']+' ('+jsondata['Year']+')',jsondata['Poster'],informacao,ttcode[0],jsondata['Year']])
 
-def getimdblinks(url,results,order):
+def getimdblinks(url,results,order,Source=None):
 	try:
 		html_page = abrir_url(url)
 		soup = BeautifulSoup(html_page)
-		for link in soup.findAll('a', attrs={'href': re.compile("^http://.+?/title")}):
-			results.append([order, link.get('href').replace('?ref_=ttmd_md_nm','')])
-			order += 1	
+		if Source == 'IMDB':
+			for link in soup.findAll('a', attrs={'href': re.compile("^/title/.+?/\?ref_=.+?_ov_tt")}):
+				results.append([order, link.get('href').replace('?ref_=ttmd_md_nm','')])
+				order += 1			
+		else:
+			for link in soup.findAll('a', attrs={'href': re.compile("^http://.+?/title")}):
+				results.append([order, link.get('href').replace('?ref_=ttmd_md_nm','')])
+				order += 1
+		return results
 	except BaseException as e: print '##ERROR-##getimdblinks: '+url+' '+str(e)
 
 def readalllines(file):
@@ -414,5 +432,6 @@ if mode==None or url==None or len(url)<1: MAIN(index)
 elif mode==1: trailer(name,url)
 elif mode==2: playparser(name,url,imdb_id,year)
 elif mode==3: latestreleases(index)
-elif mode==5: xbmcgui.Dialog().ok('Cache',basic.removecache(cachePath))
+elif mode==4: IMDBmenu()
+elif mode==5: IMDBlist(name,url)
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

@@ -15,7 +15,7 @@ cachePath			= os.path.join(dataPath,'cache')
 sitesfile 			= os.path.join(os.path.join(addonPath, 'resources'),'sites.txt')
 sitecachefile 		= os.path.join(cachePath,'_cache.txt')
 getSetting          = xbmcaddon.Addon().getSetting
-sites 				= ['http://irfree.com/movies/page/','http://sceper.ws/category/movies/page/','http://www.scnsrc.me/category/films/page/']
+sites 				= ['http://irfree.com/movies/page/','http://sceper.ws/category/movies/page/','http://www.scnsrc.me/category/films/page/','http://rapidmoviez.com/l/m/']
 
 if not os.path.exists(dataPath): os.makedirs(dataPath)
 if not os.path.exists(cachePath): os.makedirs(cachePath)
@@ -27,6 +27,7 @@ def MAIN(index):
 def IMDBmenu():
 	addDir('In Theaters','http://www.imdb.com/movies-in-theaters/',5,'',True,1,'','','','')
 	addDir('Comming Soon','http://www.imdb.com/movies-coming-soon/',5,'',True,1,'','','','')
+	
 def IMDBlist(name,url):
 	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
 	results = getimdblinks(url,[],1,'IMDB')

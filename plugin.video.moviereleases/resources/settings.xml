@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="General">
+        <setting label="General" type="lsep" />
+		<setting id="allyear" type="bool" default="true" label="Retornar todos Anos"/>		
+		<setting id="minyear" type="slider" default="2013" label="Ano Mínimo" range="1900,1,2015" option="int" enable="eq(-1,false)"/>
+		<setting id="maxyear" type="slider" default="2015" label="Ano Máximo" range="1900,1,2015" option="int" enable="eq(-2,false)"/>
+		<setting id="pages-num" type="slider" default="5" label="Número de páginas para listar" range="1,1,10" option="int"/>
+		<setting id="cachesites" type="bool" label="Guardar Cache dos sites" default="true" />
+    </category>
+</settings>

@@ -21,6 +21,9 @@ if not os.path.exists(dataPath): os.makedirs(dataPath)
 if not os.path.exists(cachePath): os.makedirs(cachePath)
 
 def MAIN(index):
+	addDir('Latest Releases','Latest Releases',3,'',True,1,'','','','')
+	
+def latestreleases(index):
 	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
 	unique_stuff = []
 	threads = []	
@@ -39,7 +42,7 @@ def MAIN(index):
 	[i.join() for i in threads]
 	results = sorted(results, key=getKey)
 	for order,link in results:
-		if link not in str(unique_stuff): unique_stuff.append([order, link])		
+		if link not in str(unique_stuff): unique_stuff.append([order, link])
 	chunks=[unique_stuff[x:x+10] for x in xrange(0, len(unique_stuff), 10)]
 	for i in range(0,len(chunks)): threads2.append(threading.Thread(name='chunks'+str(i),target=populatelist,args=(chunks[i],list, )))
 	[i.start() for i in threads2]
@@ -51,8 +54,8 @@ def MAIN(index):
 			writefile(sitecachefile,"a",'::pageindex::'+str(ranging)+'::'+title.encode('ascii', 'xmlcharrefreplace')+'::\n')
 			addDir(title,title,2,poster,False,len(list),information,ranging,imdb_id,year)
 		elif '::pageindex::'+str(ranging)+'::'+title.encode('ascii', 'xmlcharrefreplace') in str(linecache): addDir(title,title,2,poster,False,len(list),information,ranging,imdb_id,year)
-	addDir('Next>>','','','',True,1,'',ranging,'','')		
-	
+	addDir('Next>>','Next>>',3,'',True,1,'',ranging,'','')		
+
 def populatelist(results,list):
 	for index,link in results:
 		dur = ''
@@ -91,10 +94,9 @@ def getimdblinks(url,results,order):
 		html_page = abrir_url(url)
 		soup = BeautifulSoup(html_page)
 		for link in soup.findAll('a', attrs={'href': re.compile("^http://.+?/title")}):
-			results.append([order, link.get('href')])
-			order += 1				
-	except: pass
-	#return order,results
+			results.append([order, link.get('href').replace('?ref_=ttmd_md_nm','')])
+			order += 1	
+	except BaseException as e: print '##ERROR-##getimdblinks: '+url+' '+str(e)
 
 def readalllines(file):
 	f = open(file,"r")
@@ -108,14 +110,14 @@ def writefile(file,mode,string):
 	writes.close()
 	
 def abrir_url(url, encoding='utf-8'):
-    req = urllib2.Request(url)
-    req.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
-    req.add_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
-    response = urllib2.urlopen(req)
-    link=response.read()
-    response.close()
-    if encoding != 'utf-8': link = link.decode(encoding).encode('utf-8')
-    return link
+	req = urllib2.Request(url)
+	req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:10.0a1) Gecko/20111029 Firefox/10.0a1')
+	req.add_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
+	response = urllib2.urlopen(req)
+	link=response.read()
+	response.close()
+	if encoding != 'utf-8': link = link.decode(encoding).encode('utf-8')
+	return link
 	
 def addDir(name,url,mode,iconimage,pasta,total,informacao,index,imdb_id,year):
 	u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name.encode('ascii', 'xmlcharrefreplace'))+"&index="+str(index)+"&imdb_id="+str(imdb_id)+"&year="+str(year)
@@ -411,5 +413,6 @@ print "year: "+str(year)
 if mode==None or url==None or len(url)<1: MAIN(index)
 elif mode==1: trailer(name,url)
 elif mode==2: playparser(name,url,imdb_id,year)
+elif mode==3: latestreleases(index)
 elif mode==5: xbmcgui.Dialog().ok('Cache',basic.removecache(cachePath))
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

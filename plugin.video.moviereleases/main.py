@@ -23,8 +23,6 @@ if not os.path.exists(dataPath): os.makedirs(dataPath)
 if not os.path.exists(cachePath): os.makedirs(cachePath)
 
 def MAIN():
-	print links.link().tmdb_info,links.link().tmdb_theaters,links.link().tmdb_upcoming,links.link().tmdb_backdropbase,links.link().tmdb_posterbase
-	print tmdb.searchmovie('157336')
 	addDir('Latest Releases','Latest Releases',3,'',True,1,'',0,'','')
 	addDir('TMDB','TMDB',6,'',True,1,'',0,'','')	
 	addDir('IMDB','IMDB',4,'',True,1,'',0,'','')
@@ -129,11 +127,15 @@ def getimdblinks(url,results,order,Source=None):
 		soup = BeautifulSoup(html_page)
 		if Source == 'IMDB':
 			for link in soup.findAll('a', attrs={'href': re.compile("^/title/.+?/\?ref_=.+?_ov_tt")}):
-				results.append([order, link.get('href').replace('?ref_=ttmd_md_nm','')])
+				if '?' in link.get('href'): cleanlink = link.get('href').split("?")[0]
+				else: cleanlink = link.get('href')
+				results.append([order, cleanlink])
 				order += 1			
 		else:
 			for link in soup.findAll('a', attrs={'href': re.compile("^http://.+?/title")}):
-				results.append([order, link.get('href').replace('?ref_=ttmd_md_nm','')])
+				if '?' in link.get('href'): cleanlink = link.get('href').split("?")[0]
+				else: cleanlink = link.get('href')
+				results.append([order, cleanlink])
 				order += 1
 		return results
 	except BaseException as e: print '##ERROR-##getimdblinks: '+url+' '+str(e)

@@ -5,6 +5,8 @@
 
 import xbmcplugin,xbmcgui,xbmc,xbmcaddon,os,threading,urllib2,re,json,urllib,base64
 from BeautifulSoup import BeautifulSoup
+from resources.libs import links,tmdb
+from HTMLParser import HTMLParser
 
 addonName           = xbmcaddon.Addon().getAddonInfo("name")
 addonVersion        = xbmcaddon.Addon().getAddonInfo("version")
@@ -20,13 +22,32 @@ sites 				= ['http://irfree.com/movies/page/','http://sceper.ws/category/movies/
 if not os.path.exists(dataPath): os.makedirs(dataPath)
 if not os.path.exists(cachePath): os.makedirs(cachePath)
 
-def MAIN(index):
-	addDir('Latest Releases','Latest Releases',3,'',True,1,'','','','')
-	addDir('IMDB','IMDB',4,'',True,1,'','','','')
+def MAIN():
+	print links.link().tmdb_info,links.link().tmdb_theaters,links.link().tmdb_upcoming,links.link().tmdb_backdropbase,links.link().tmdb_posterbase
+	print tmdb.searchmovie('157336')
+	addDir('Latest Releases','Latest Releases',3,'',True,1,'',0,'','')
+	addDir('TMDB','TMDB',6,'',True,1,'',0,'','')	
+	addDir('IMDB','IMDB',4,'',True,1,'',0,'','')
 
 def IMDBmenu():
 	addDir('In Theaters','http://www.imdb.com/movies-in-theaters/',5,'',True,1,'','','','')
 	addDir('Comming Soon','http://www.imdb.com/movies-coming-soon/',5,'',True,1,'','','','')
+
+def TMDBmenu():
+	addDir('In Theaters','Theaters',7,'',True,1,'',1,'','')
+	addDir('Upcoming','Upcoming',7,'',True,1,'',1,'','')
+	addDir('Popular','Popular',7,'',True,1,'',1,'','')
+	addDir('Top Rated','TopRated',7,'',True,1,'',1,'','')
+
+def TMDBlist(index,url):
+	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
+	listdirs = []
+	if url == 'Theaters': listdirs = tmdb.listmovies(links.link().tmdb_theaters % (index))
+	elif url == 'Popular': listdirs = tmdb.listmovies(links.link().tmdb_popular % (index))
+	elif url == 'Upcoming': listdirs = tmdb.listmovies(links.link().tmdb_upcoming % (index))
+	elif url == 'TopRated': listdirs = tmdb.listmovies(links.link().tmdb_top_rated % (index))
+	for j in listdirs: addDir(j['label'],j['imdbid'],2,j['poster'],False,len(listdirs)+1,j['info'],'',j['imdbid'],j['year'],j['fanart_image'])
+	addDir('Next>>',url,7,'',True,len(listdirs)+1,'',int(index)+1,'','')
 	
 def IMDBlist(name,url):
 	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
@@ -138,14 +159,14 @@ def abrir_url(url, encoding='utf-8'):
 	if encoding != 'utf-8': link = link.decode(encoding).encode('utf-8')
 	return link
 	
-def addDir(name,url,mode,iconimage,pasta,total,informacao,index,imdb_id,year):
-	u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name.encode('ascii', 'xmlcharrefreplace'))+"&index="+str(index)+"&imdb_id="+str(imdb_id)+"&year="+str(year)
+def addDir(name,url,mode,poster,pasta,total,info,index,imdb_id,year,fanart=None):
+	u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name.encode('ascii','xmlcharrefreplace'))+"&index="+str(index)+"&imdb_id="+str(imdb_id)+"&year="+str(year)
 	ok=True
 	context = []
 	context.append(('Ver Trailer', 'RunPlugin(%s?mode=1&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
-	liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
-	liz.setProperty('fanart_image',iconimage)
-	if informacao <> '': liz.setInfo( type="Video", infoLabels=informacao )	
+	liz=xbmcgui.ListItem(name, iconImage=poster, thumbnailImage=poster)
+	liz.setProperty('fanart_image',fanart)
+	if info <> '': liz.setInfo( type="Video", infoLabels=info )	
 	liz.addContextMenuItems(context, replaceItems=False)
 	ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 	return ok
@@ -429,10 +450,12 @@ print "Index: "+str(index)
 print "imdb_id: "+str(imdb_id)
 print "year: "+str(year)
 
-if mode==None or url==None or len(url)<1: MAIN(index)
+if mode==None or url==None or len(url)<1: MAIN()
 elif mode==1: trailer(name,url)
 elif mode==2: playparser(name,url,imdb_id,year)
 elif mode==3: latestreleases(index)
 elif mode==4: IMDBmenu()
 elif mode==5: IMDBlist(name,url)
+elif mode==6: TMDBmenu()
+elif mode==7: TMDBlist(index,url)
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

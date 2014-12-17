@@ -1,5 +1,11 @@
+Version 0.0.3
+* 3rd alpha release
+- Caching tmdb info;
+- Latest Releases sources can be changed in settings;
+- New Releases sources can be set in settings;
+- TMDB api fully operational;
+
 Version 0.0.2
 * Second alpha release
-
 Version 0.0.1
 * First addon release

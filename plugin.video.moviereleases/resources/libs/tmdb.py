@@ -2,21 +2,41 @@
 # by Mafarricos
 # email: MafaStudios@gmail.com
 # This program is free software: GNU General Public License
-import basic,links,json
+import basic,links,json,omdbapi,threading,xbmcaddon,os
 
 LANG = basic.get_api_language()
+getSetting          = xbmcaddon.Addon().getSetting
 
-def listmovies(url):
+def listmovies(url,cachePath):
 	mainlist = []
+	sendlist = [] 
+	result = []
+	threads = []
+	order = 0
 	jsonpage = basic.open_url(url)
 	j = json.loads(jsonpage)
-	for list in j['results']: mainlist.append(searchmovie(list['id']))
+	#for list in j['results']: mainlist.append(searchmovie(list['id']))
+	for list in j['results']: 
+		order += 1
+		sendlist.append([order,list['id']])
+	##single thread
+	#searchmovielist(sendlist,result)
+	##mult thread
+	chunks=[sendlist[x:x+5] for x in xrange(0, len(sendlist), 5)]
+	for i in range(0,len(chunks)): threads.append(threading.Thread(name='listmovies'+str(i),target=searchmovielist,args=(chunks[i],result,cachePath, )))
+	[i.start() for i in threads]
+	[i.join() for i in threads]
+	result = sorted(result, key=basic.getKey)
+	for id,lists in result: mainlist.append(lists)
 	return mainlist
-	
-def searchmovie(id):
+
+def searchmovielist(list,result,cachePath):
+	for num,id in list: result.append([num,searchmovie(id,cachePath)])
+
+def searchmovie(id,cachePath):
 	listgenre = []
-	fanart = ''
-	poster = ''
+	listcast = []
+	listcastr = []	
 	genre = ''
 	title = ''
 	plot = ''
@@ -24,31 +44,42 @@ def searchmovie(id):
 	director = ''
 	writer = ''
 	credits = ''
-	listcast = []
-	listcastr = []
+	poster = ''
+	fanart = ''
+	duration = ''
+	videocache = os.path.join(cachePath,str(id))
+	if os.path.isfile(videocache): return json.loads(basic.readfiletoJSON(videocache))
 	jsonpage = basic.open_url(links.link().tmdb_info_default % (id))
-	jdef = json.loads(jsonpage)
-	if LANG <> 'en':	
-		jsonpage = basic.open_url(links.link().tmdb_info % (id,LANG))
-		j = json.loads(jsonpage)
-		title = j['title']
-		fanart = links.link().tmdb_backdropbase % (j["backdrop_path"])
-		poster = links.link().tmdb_posterbase % (j["poster_path"])
-		for g in j['genres']: listgenre.append(g['name'])
-		genre = ', '.join(listgenre)
-		try: plot = j['overview']
+	if not jsonpage: jsonpage = basic.open_url(links.link().tmdb_info_default_alt % (id))
+	try: jdef = json.loads(jsonpage)
+	except: jdef = ''
+	if LANG <> 'en':
+		try:
+			jsonpage = basic.open_url(links.link().tmdb_info % (id,LANG))
+			j = json.loads(jsonpage)
+			title = j['title']
+			fanart = links.link().tmdb_backdropbase % (j["backdrop_path"])
+			poster = links.link().tmdb_posterbase % (j["poster_path"])
+			for g in j['genres']: listgenre.append(g['name'])
+			genre = ', '.join(listgenre)
+			try: plot = j['overview']
+			except: pass
+			try: tagline = j['tagline']
+			except: pass
+			fanart = j["backdrop_path"]
+			poster = j["poster_path"]
 		except: pass
-		try: tagline = j['tagline']
-		except: pass
-		
-	if title == '': title = jdef['title']
-	if fanart == '': fanart = links.link().tmdb_backdropbase % (jdef["backdrop_path"])
-	if poster == '': poster = links.link().tmdb_posterbase % (jdef["poster_path"])
+	if not title: title = jdef['title']		
+	if not poster: poster = jdef['poster_path']
+	if not fanart: fanart = jdef['backdrop_path']
+	if not fanart: fanart = poster
+	if fanart: fanart = links.link().tmdb_backdropbase % (fanart)
+	if poster: poster = links.link().tmdb_posterbase % (poster)	
 	if genre == '':
 		for g in jdef['genres']: listgenre.append(g['name'])
 		genre = ', '.join(listgenre)
-	if plot == '': plot = jdef['overview']
-	if tagline == '': tagline = jdef['tagline']
+	if not plot: plot = jdef['overview']
+	if not tagline: tagline = jdef['tagline']
 	try: trailer = "plugin://plugin.video.youtube/?action=play_video&videoid=%s" % (jdef['trailers']['youtube'][0]['source'])
 	except: trailer = ''
 	try: year = jdef["release_date"].split("-")[0]
@@ -74,10 +105,24 @@ def searchmovie(id):
 		if crew['job'] == 'Screenplay': 
 			writer = crew['name']
 			break
-	return {
+	duration = jdef['runtime']
+	if not poster and jdef['imdb_id']:
+		altsearch = omdbapi.searchmovie(jdef['imdb_id'])
+		poster = altsearch['poster']
+		if not fanart: fanart = poster
+		if not plot: plot = altsearch['info']['plot']
+		if not tagline: tagline = altsearch['info']['plot']	
+		if not listcast: 
+			listcast = altsearch['info']['cast']
+			listcastr = []
+		if not duration: duration = altsearch['info']['duration']
+		if not writer: writer = altsearch['info']['writer']
+		if not director: director = altsearch['info']['director']		
+		if not genre: genre = altsearch['info']['genre']
+	response = {
         "label": '%s (%s)' % (title,year),
-        "poster": links.link().tmdb_posterbase % (j["poster_path"]),
-		"fanart_image": links.link().tmdb_backdropbase % (j["backdrop_path"]),
+        "poster": poster,
+		"fanart_image": fanart,
 		"imdbid": jdef['imdb_id'],
 		"year": year,
 		"info":{
@@ -91,7 +136,7 @@ def searchmovie(id):
 			"plotoutline": plot,
 			"title": title,
 			"originaltitle": jdef['original_title'],
-			"duration": jdef['runtime'],
+			"duration": duration,
 			"studio": studio,
 			"tagline": tagline,
 			"writer": writer,
@@ -102,3 +147,5 @@ def searchmovie(id):
 			"trailer": trailer
 			}
 		}
+	if getSetting("cachesites") == 'true': basic.writefile(videocache,'w',json.dumps(response))
+	return response

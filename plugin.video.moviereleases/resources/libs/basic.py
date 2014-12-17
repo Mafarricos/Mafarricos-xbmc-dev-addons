@@ -6,6 +6,9 @@
 import os,json,urllib2
 from HTMLParser import HTMLParser
 
+def getKey(item):
+	return item[0]
+	
 def cleanTitle(title):
 	title = title.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&").replace("&#39;", "'").replace("&quot;", "\"").replace("&ndash;", "-")
 	title = title.replace('"',"")

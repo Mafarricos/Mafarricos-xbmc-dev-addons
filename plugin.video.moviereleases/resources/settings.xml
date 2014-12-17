@@ -1,12 +1,44 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
     <category label="General">
-        <setting label="General" type="lsep" />
+		<setting id="cachesites" type="bool" label="Guardar Cache dos sites" default="true" />
+		<setting id="pref_language" type="labelenum" label="Preferred Metadata Language" values="system|aa|ab|af|am|ar|as|ay|az|ba|be|bg|bh|bi|bn|bo|br|ca|co|cs|cy|da|de|dz|el|en|eo|es|et|eu|fa|fi|fj|fo|fr|fy|ga|gd|gl|gn|gu|ha|hi|hr|hu|hy|ia|ie|ik|in|is|it|iw|ja|ji|jw|ka|kk|kl|km|kn|ko|ks|ku|ky|la|ln|lo|lt|lv|mg|mi|mk|ml|mn|mo|mr|ms|mt|my|na|ne|nl|no|oc|om|or|pa|pl|ps|pt|qu|rm|rn|ro|ru|rw|sa|sd|sg|sh|si|sk|sl|sm|sn|so|sq|sr|ss|st|su|sv|sw|ta|te|tg|th|ti|tk|tl|tn|to|tr|ts|tt|tw|uk|ur|uz|vi|vo|wo|xh|yo|zh|zu" default="system" />
+    </category>
+    <category label="Latest Releases">
 		<setting id="allyear" type="bool" default="true" label="Retornar todos Anos"/>		
 		<setting id="minyear" type="slider" default="2013" label="Ano Mínimo" range="1900,1,2015" option="int" enable="eq(-1,false)"/>
 		<setting id="maxyear" type="slider" default="2015" label="Ano Máximo" range="1900,1,2015" option="int" enable="eq(-2,false)"/>
-		<setting id="pages-num" type="slider" default="2" label="Número de páginas para listar" range="1,1,10" option="int"/>
-		<setting id="cachesites" type="bool" label="Guardar Cache dos sites" default="true" />
-        <setting id="pref_language" type="labelenum" label="Preferred Metadata Language" values="system|aa|ab|af|am|ar|as|ay|az|ba|be|bg|bh|bi|bn|bo|br|ca|co|cs|cy|da|de|dz|el|en|eo|es|et|eu|fa|fi|fj|fo|fr|fy|ga|gd|gl|gn|gu|ha|hi|hr|hu|hy|ia|ie|ik|in|is|it|iw|ja|ji|jw|ka|kk|kl|km|kn|ko|ks|ku|ky|la|ln|lo|lt|lv|mg|mi|mk|ml|mn|mo|mr|ms|mt|my|na|ne|nl|no|oc|om|or|pa|pl|ps|pt|qu|rm|rn|ro|ru|rw|sa|sd|sg|sh|si|sk|sl|sm|sn|so|sq|sr|ss|st|su|sv|sw|ta|te|tg|th|ti|tk|tl|tn|to|tr|ts|tt|tw|uk|ur|uz|vi|vo|wo|xh|yo|zh|zu" default="system" />
+		<setting id="pages-num" type="slider" default="2" label="Número de páginas para listar" range="1,1,10" option="int"/>	
+		<setting id="site1on" type="bool" default="true" label="Site 1 Activo"/>
+		<setting id="site1" type="text" default="http://www.rlsbb.com/category/movies/page/" label="Site 1" enable="eq(-1,true)"/>
+		<setting id="site2on" type="bool" default="true" label="Site 2 Activo"/>
+		<setting id="site2" type="text" default="http://www.ddlvalley.rocks/category/movies/page/" label="Site 2" enable="eq(-1,true)"/>
+		<setting id="site3on" type="bool" default="true" label="Site 3 Activo"/>
+		<setting id="site3" type="text" default="http://irfree.com/movies/page/" label="Site 3" enable="eq(-1,true)"/>
+		<setting id="site4on" type="bool" default="true" label="Site 4 Activo"/>
+		<setting id="site4" type="text" default="http://sceper.ws/category/movies/page/" label="Site 4" enable="eq(-1,true)"/>
+		<setting id="site5on" type="bool" default="true" label="Site 5 Activo"/>
+		<setting id="site5" type="text" default="http://www.scnsrc.me/category/films/page/" label="Site 5" enable="eq(-1,true)"/>
+		<setting id="site6on" type="bool" default="true" label="Site 6 Activo"/>
+		<setting id="site6" type="text" default="http://www.rlslog.net/category/movies/bdrip/page/" label="Site 6" enable="eq(-1,true)"/>
+		<setting id="site7on" type="bool" default="true" label="Site 7 Activo"/>
+		<setting id="site7" type="text" default="http://www.rlslog.net/category/movies/dvdrip/page/" label="Site 7" enable="eq(-1,true)"/>
+		<setting id="site8on" type="bool" default="true" label="Site 8 Activo"/>
+		<setting id="site8" type="text" default="http://rapidmoviez.com/l/m/" label="Site 8" enable="eq(-1,true)"/>
+		<setting id="site9on" type="bool" default="false" label="Site 9 Activo"/>
+		<setting id="site9" type="text" default="" label="Site 9" enable="eq(-1,true)"/>
+		<setting id="site10on" type="bool" default="false" label="Site 10 Activo"/>
+		<setting id="site10" type="text" default="" label="Site 10" enable="eq(-1,true)"/>
+		<setting id="site11on" type="bool" default="false" label="Site 11 Activo"/>
+		<setting id="site11" type="text" default="" label="Site 11" enable="eq(-1,true)"/>
+		<setting id="site12on" type="bool" default="false" label="Site 12 Activo"/>
+		<setting id="site12" type="text" default="" label="Site 12" enable="eq(-1,true)"/>
+		<setting id="site13on" type="bool" default="false" label="Site 13 Activo"/>
+		<setting id="site13" type="text" default="" label="Site 13" enable="eq(-1,true)"/>
+		<setting id="site14on" type="bool" default="false" label="Site 14 Activo"/>
+		<setting id="site14" type="text" default="" label="Site 14" enable="eq(-1,true)"/>
+		<setting id="site15on" type="bool" default="false" label="Site 15 Activo"/>
+		<setting id="site15" type="text" default="" label="Site 15" enable="eq(-1,true)"/>
+		
     </category>
 </settings>

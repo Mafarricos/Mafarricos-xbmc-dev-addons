@@ -5,8 +5,7 @@
 
 import xbmcplugin,xbmcgui,xbmc,xbmcaddon,os,threading,urllib2,re,json,urllib,base64
 from BeautifulSoup import BeautifulSoup
-from resources.libs import links,tmdb
-from HTMLParser import HTMLParser
+from resources.libs import links,tmdb,basic
 
 addonName           = xbmcaddon.Addon().getAddonInfo("name")
 addonVersion        = xbmcaddon.Addon().getAddonInfo("version")
@@ -17,149 +16,106 @@ cachePath			= os.path.join(dataPath,'cache')
 sitesfile 			= os.path.join(os.path.join(addonPath, 'resources'),'sites.txt')
 sitecachefile 		= os.path.join(cachePath,'_cache.txt')
 getSetting          = xbmcaddon.Addon().getSetting
-sites 				= ['http://www.rlsbb.com/category/movies/page/','http://www.ddlvalley.rocks/category/movies/page/','http://irfree.com/movies/page/','http://sceper.ws/category/movies/page/','http://www.scnsrc.me/category/films/page/','http://www.rlslog.net/category/movies/bdrip/page/','http://www.rlslog.net/category/movies/dvdrip/page/','http://rapidmoviez.com/l/m/']
 
 if not os.path.exists(dataPath): os.makedirs(dataPath)
 if not os.path.exists(cachePath): os.makedirs(cachePath)
 
 def MAIN():
-	addDir('Latest Releases','Latest Releases',3,'',True,1,'',0,'','')
-	addDir('TMDB','TMDB',6,'',True,1,'',0,'','')	
-	addDir('IMDB','IMDB',4,'',True,1,'',0,'','')
+	addDir('Latest Releases','Latest Releases',3,'',True,4,'',0,'','')
+	addDir('TMDB','TMDB',6,'',True,4,'',0,'','')	
+	addDir('IMDB','IMDB',4,'',True,4,'',0,'','')
+	addDir('Clean Cache','Clean Cache',8,'',False,4,'',0,'','')	
 
 def IMDBmenu():
-	addDir('In Theaters','http://www.imdb.com/movies-in-theaters/',5,'',True,1,'','','','')
-	addDir('Comming Soon','http://www.imdb.com/movies-coming-soon/',5,'',True,1,'','','','')
+	addDir('In Theaters','http://www.imdb.com/movies-in-theaters/',5,'',True,2,'','','','')
+	addDir('Comming Soon','http://www.imdb.com/movies-coming-soon/',5,'',True,2,'','','','')
 
 def TMDBmenu():
-	addDir('In Theaters','Theaters',7,'',True,1,'',1,'','')
-	addDir('Upcoming','Upcoming',7,'',True,1,'',1,'','')
-	addDir('Popular','Popular',7,'',True,1,'',1,'','')
-	addDir('Top Rated','TopRated',7,'',True,1,'',1,'','')
+	addDir('In Theaters','Theaters',7,'',True,4,'',1,'','')
+	addDir('Upcoming','Upcoming',7,'',True,4,'',1,'','')
+	addDir('Popular','Popular',7,'',True,4,'',1,'','')
+	addDir('Top Rated','TopRated',7,'',True,4,'',1,'','')
 
 def TMDBlist(index,url):
 	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
 	listdirs = []
-	if url == 'Theaters': listdirs = tmdb.listmovies(links.link().tmdb_theaters % (index))
-	elif url == 'Popular': listdirs = tmdb.listmovies(links.link().tmdb_popular % (index))
-	elif url == 'Upcoming': listdirs = tmdb.listmovies(links.link().tmdb_upcoming % (index))
-	elif url == 'TopRated': listdirs = tmdb.listmovies(links.link().tmdb_top_rated % (index))
+	if url == 'Theaters': listdirs = tmdb.listmovies(links.link().tmdb_theaters % (index),cachePath)
+	elif url == 'Popular': listdirs = tmdb.listmovies(links.link().tmdb_popular % (index),cachePath)
+	elif url == 'Upcoming': listdirs = tmdb.listmovies(links.link().tmdb_upcoming % (index),cachePath)
+	elif url == 'TopRated': listdirs = tmdb.listmovies(links.link().tmdb_top_rated % (index),cachePath)
 	for j in listdirs: addDir(j['label'],j['imdbid'],2,j['poster'],False,len(listdirs)+1,j['info'],'',j['imdbid'],j['year'],j['fanart_image'])
 	addDir('Next>>',url,7,'',True,len(listdirs)+1,'',int(index)+1,'','')
 	
 def IMDBlist(name,url):
 	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
 	results = getimdblinks(url,[],1,'IMDB')
+	print results
 	populateDir(results,1)
 	
 def latestreleases(index):
+	sites = []
+	for i in range(1, 15):
+		if getSetting("site"+str(i)+"on") == 'true': sites.append(getSetting("site"+str(i)))
 	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
-	threads = []	
+	threads = []
+	f = 0	
 	results = []
 	try: ranging = int(index)+1
 	except: 
 		ranging = 1
-		open(sitecachefile, 'w').close()
+	if ranging ==1: open(sitecachefile, 'w').close()
 	for i in range(ranging, ranging+int(getSetting('pages-num'))):
-		for site in sites: threads.append(threading.Thread(name=site+str(i),target=getimdblinks,args=(site+str(i)+'/',results,i*100, )))
+		for site in sites: 
+			f = f + 1
+			threads.append(threading.Thread(name=site+str(i),target=getimdblinks,args=(site+str(i)+'/',results,f*100, )))
 	ranging = i
 	[i.start() for i in threads]
 	[i.join() for i in threads]
-	populateDir(results,ranging)
+	populateDir(results,ranging,True)
 	addDir('Next>>','Next>>',3,'',True,1,'',ranging,'','')		
 
-def populateDir(results,ranging):
+def populateDir(results,ranging,cache=None):
 	unique_stuff = []
 	threads2 = []	
-	list = []
+	result = []
 	order = 0	
-	results = sorted(results, key=getKey)
+	results = sorted(results, key=basic.getKey)
 	for order,link in results:
 		if link not in str(unique_stuff): unique_stuff.append([order, link])
 	chunks=[unique_stuff[x:x+10] for x in xrange(0, len(unique_stuff), 10)]
-	for i in range(0,len(chunks)): threads2.append(threading.Thread(name='chunks'+str(i),target=populatelist,args=(chunks[i],list, )))
+	for i in range(0,len(chunks)): threads2.append(threading.Thread(name='listmovies'+str(i),target=tmdb.searchmovielist,args=(chunks[i],result,cachePath, )))
 	[i.start() for i in threads2]
 	[i.join() for i in threads2]
-	list = sorted(list, key=getKey)
-	linecache= readalllines(sitecachefile)
-	for order,title,poster,information,imdb_id,year in list:
-		if title not in str(linecache):
-			writefile(sitecachefile,"a",'::pageindex::'+str(ranging)+'::'+title.encode('ascii', 'xmlcharrefreplace')+'::\n')
-			addDir(title,title,2,poster,False,len(list),information,ranging,imdb_id,year)
-		elif '::pageindex::'+str(ranging)+'::'+title.encode('ascii', 'xmlcharrefreplace') in str(linecache): addDir(title,title,2,poster,False,len(list),information,ranging,imdb_id,year)
-
-def populatelist(results,list):
-	for index,link in results:
-		dur = ''
-		ttcode = re.findall('tt(\d+)', link, re.DOTALL)
-		try:
-			tmdb_image = 'http://image.tmdb.org/t/p/w500'		
-			tmdb_key = base64.urlsafe_b64decode('ODFlNjY4ZTdhMzdhM2Y2NDVhMWUyMDYzNjg3ZWQ3ZmQ=')
-			tmdb_info = 'http://api.themoviedb.org/3/movie/tt'+str(ttcode[0])+'?language=en&api_key='+tmdb_key
-			jsonpage = abrir_url(tmdb_info)
-			jsondata = json.loads(jsonpage)
-			Year = re.findall('(\d+)-\d+-\d+', jsondata['release_date'], re.DOTALL)
-			listgenre = []
-			for genre in jsondata['genres']: listgenre.append(genre['name'])
-			strgenre = ', '.join(listgenre)
-			liststudios = []
-			for studios in jsondata['production_companies']: liststudios.append(studios['name'])
-			try: strstudios = liststudios[0]
-			except: strstudios = ''
-			informacao = {"code": jsondata['imdb_id'], "title": jsondata['title'], "originaltitle": jsondata['original_title'], "year": Year[0], "rating": jsondata['vote_average'], "plot": jsondata['overview'] , "genre": strgenre, "votes": jsondata['vote_count'], "duration": jsondata['runtime'], "studio": strstudios}
-			if getSetting('allyear') == 'true': list.append([index,jsondata['title']+' ('+Year[0]+')',tmdb_image+jsondata['poster_path'],informacao,ttcode[0],Year[0]])
-			elif int(Year[0]) >= int(getSetting('minyear')) and int(Year[0]) <= int(getSetting('maxyear')): list.append([index,jsondata['title']+' ('+Year[0]+')',tmdb_image+jsondata['poster_path'],informacao,ttcode[0],Year[0]])
-		except:
-			jsonpage = abrir_url('http://www.omdbapi.com/?plot=short&r=json&i=tt'+str(ttcode[0]))
-			jsondata = json.loads(jsonpage)
-			actors = jsondata['Actors'].split(', ')
-			duration = re.findall('(\d+) min', jsondata['Runtime'], re.DOTALL)
-			if duration: dur = duration[0]
-			duration = re.findall('(\d) h', jsondata['Runtime'], re.DOTALL)
-			if duration: dur = int(duration[0])*60
-			informacao = {"code": jsondata['imdbID'], "title": jsondata['Title'], "originaltitle": jsondata['Title'], "year": jsondata['Year'], "rating": jsondata['imdbRating'], "plot": jsondata['Plot'] , "genre": jsondata['Genre'], "director": jsondata['Director'], "writer": jsondata['Writer'], "cast": actors, "votes": jsondata['imdbVotes'], "mpaa": jsondata['Rated'], "duration": dur}
-			if getSetting('allyear') == 'true': list.append([index,jsondata['Title']+' ('+jsondata['Year']+')',jsondata['Poster'],informacao,ttcode[0],jsondata['Year']])
-			elif int(jsondata['Year']) >= int(getSetting('minyear')) and int(jsondata['Year']) <= int(getSetting('maxyear')): list.append([index,jsondata['Title']+' ('+jsondata['Year']+')',jsondata['Poster'],informacao,ttcode[0],jsondata['Year']])
+	result = sorted(result, key=basic.getKey)
+	if cache: linecache= basic.readalllines(sitecachefile)
+	for id,lists in result:
+		if cache:
+			if lists['label'].encode('utf-8') not in str(linecache):
+				basic.writefile(sitecachefile,"a",'::pageindex::'+str(ranging)+'::'+lists['label'].encode('utf-8')+'::\n')
+				if (getSetting('allyear') == 'true') or ((getSetting('allyear') == 'false') and (int(lists['info']['year']) >= int(getSetting('minyear')) and int(lists['info']['year']) <= int(getSetting('maxyear')))): addDir(lists['label'],lists['imdbid'],2,lists['poster'],False,len(result)+1,lists['info'],ranging,lists['imdbid'],lists['year'],lists['fanart_image'])
+			elif '::pageindex::'+str(ranging)+'::'+lists['label'].encode('utf-8') in str(linecache): 
+				if (getSetting('allyear') == 'true') or ((getSetting('allyear') == 'false') and (int(lists['info']['year']) >= int(getSetting('minyear')) and int(lists['info']['year']) <= int(getSetting('maxyear')))): addDir(lists['label'],lists['imdbid'],2,lists['poster'],False,len(result)+1,lists['info'],ranging,lists['imdbid'],lists['year'],lists['fanart_image'])
+		else:
+			if (getSetting('allyear') == 'true') or ((getSetting('allyear') == 'false') and (int(lists['info']['year']) >= int(getSetting('minyear')) and int(lists['info']['year']) <= int(getSetting('maxyear')))): addDir(lists['label'],lists['imdbid'],2,lists['poster'],False,len(result)+1,lists['info'],ranging,lists['imdbid'],lists['year'],lists['fanart_image'])		
 
 def getimdblinks(url,results,order,Source=None):
 	try:
-		html_page = abrir_url(url)
+		html_page = basic.open_url(url)
 		soup = BeautifulSoup(html_page)
 		if Source == 'IMDB':
 			for link in soup.findAll('a', attrs={'href': re.compile("^/title/.+?/\?ref_=.+?_ov_tt")}):
-				if '?' in link.get('href'): cleanlink = link.get('href').split("?")[0]
-				else: cleanlink = link.get('href')
+				if '?' in link.get('href'): cleanlink = link.get('href').split("?")[0].split("title")[1].replace('/','')
+				else: cleanlink = link.get('href').split("title")[1].replace('/','')
 				results.append([order, cleanlink])
 				order += 1			
 		else:
 			for link in soup.findAll('a', attrs={'href': re.compile("^http://.+?/title")}):
-				if '?' in link.get('href'): cleanlink = link.get('href').split("?")[0]
-				else: cleanlink = link.get('href')
+				if '?' in link.get('href'): cleanlink = link.get('href').split("?")[0].split("/title/")[1].replace('/','')
+				else: cleanlink = link.get('href').split("title")[1].replace('/','')
 				results.append([order, cleanlink])
 				order += 1
 		return results
 	except BaseException as e: print '##ERROR-##getimdblinks: '+url+' '+str(e)
-
-def readalllines(file):
-	f = open(file,"r")
-	lines = f.readlines()
-	f.close()
-	return lines
-
-def writefile(file,mode,string):
-	writes = open(file, mode)
-	writes.write(string)
-	writes.close()
-	
-def abrir_url(url, encoding='utf-8'):
-	req = urllib2.Request(url)
-	req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:10.0a1) Gecko/20111029 Firefox/10.0a1')
-	req.add_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
-	response = urllib2.urlopen(req)
-	link=response.read()
-	response.close()
-	if encoding != 'utf-8': link = link.decode(encoding).encode('utf-8')
-	return link
 	
 def addDir(name,url,mode,poster,pasta,total,info,index,imdb_id,year,fanart=None):
 	u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name.encode('ascii','xmlcharrefreplace'))+"&index="+str(index)+"&imdb_id="+str(imdb_id)+"&year="+str(year)
@@ -172,9 +128,6 @@ def addDir(name,url,mode,poster,pasta,total,info,index,imdb_id,year,fanart=None)
 	liz.addContextMenuItems(context, replaceItems=False)
 	ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 	return ok
-
-def getKey(item):
-	return item[0]
 
 def playparser(name, url, imdb_id, year):
 	item = xbmcgui.ListItem(path=url)
@@ -460,4 +413,5 @@ elif mode==4: IMDBmenu()
 elif mode==5: IMDBlist(name,url)
 elif mode==6: TMDBmenu()
 elif mode==7: TMDBlist(index,url)
+elif mode==8: xbmcgui.Dialog().ok('Cache',basic.removecache(cachePath))
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

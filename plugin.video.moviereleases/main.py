@@ -413,9 +413,7 @@ print "year: "+str(year)
 
 if mode==None or url==None or len(url)<1: MAIN()
 elif mode==1: trailer(name,url)
-elif mode==2: 
-	try: addonsresolver.playparser(originalname,url,imdb_id,year)
-	except: print 'No addons resolver installed'
+elif mode==2: addonsresolver.playrato(originalname,url,imdb_id,year)
 elif mode==3: latestreleases(index)
 elif mode==4: IMDBmenu()
 elif mode==5: IMDBlist(name,url)

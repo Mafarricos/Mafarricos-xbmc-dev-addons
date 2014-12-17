@@ -121,6 +121,7 @@ def searchmovie(id,cachePath):
 		if not genre: genre = altsearch['info']['genre']
 	response = {
         "label": '%s (%s)' % (title,year),
+        "originallabel": '%s (%s)' % (jdef['original_title'],year),		
         "poster": poster,
 		"fanart_image": fanart,
 		"imdbid": jdef['imdb_id'],

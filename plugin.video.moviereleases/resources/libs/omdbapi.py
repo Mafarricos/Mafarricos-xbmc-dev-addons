@@ -37,6 +37,7 @@ def searchmovie(id):
 	if duration: dur = int(duration[0])*60	
 	return {
         "label": '%s (%s)' % (title,year),
+		"originallabel": '%s (%s)' % (title,year),		
         "poster": poster,
 		"fanart_image": fanart,
 		"imdbid": id,

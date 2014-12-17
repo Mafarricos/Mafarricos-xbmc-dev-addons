@@ -6,6 +6,8 @@
 import xbmcplugin,xbmcgui,xbmc,xbmcaddon,os,threading,urllib2,re,json,urllib,base64
 from BeautifulSoup import BeautifulSoup
 from resources.libs import links,tmdb,basic
+try: import addonsresolver
+except: print 'No addons resolver installed'
 
 addonName           = xbmcaddon.Addon().getAddonInfo("name")
 addonVersion        = xbmcaddon.Addon().getAddonInfo("version")
@@ -21,20 +23,20 @@ if not os.path.exists(dataPath): os.makedirs(dataPath)
 if not os.path.exists(cachePath): os.makedirs(cachePath)
 
 def MAIN():
-	addDir('Latest Releases','Latest Releases',3,'',True,4,'',0,'','')
-	addDir('TMDB','TMDB',6,'',True,4,'',0,'','')	
-	addDir('IMDB','IMDB',4,'',True,4,'',0,'','')
-	addDir('Clean Cache','Clean Cache',8,'',False,4,'',0,'','')	
+	addDir('Latest Releases','Latest Releases',3,'',True,4,'',0,'','','')
+	addDir('TMDB','TMDB',6,'',True,4,'',0,'','','')	
+	addDir('IMDB','IMDB',4,'',True,4,'',0,'','','')
+	addDir('Clean Cache','Clean Cache',8,'',False,4,'',0,'','','')	
 
 def IMDBmenu():
-	addDir('In Theaters','http://www.imdb.com/movies-in-theaters/',5,'',True,2,'','','','')
-	addDir('Comming Soon','http://www.imdb.com/movies-coming-soon/',5,'',True,2,'','','','')
+	addDir('In Theaters','http://www.imdb.com/movies-in-theaters/',5,'',True,2,'','','','','')
+	addDir('Comming Soon','http://www.imdb.com/movies-coming-soon/',5,'',True,2,'','','','','')
 
 def TMDBmenu():
-	addDir('In Theaters','Theaters',7,'',True,4,'',1,'','')
-	addDir('Upcoming','Upcoming',7,'',True,4,'',1,'','')
-	addDir('Popular','Popular',7,'',True,4,'',1,'','')
-	addDir('Top Rated','TopRated',7,'',True,4,'',1,'','')
+	addDir('In Theaters','Theaters',7,'',True,4,'',1,'','','')
+	addDir('Upcoming','Upcoming',7,'',True,4,'',1,'','','')
+	addDir('Popular','Popular',7,'',True,4,'',1,'','','')
+	addDir('Top Rated','TopRated',7,'',True,4,'',1,'','','')
 
 def TMDBlist(index,url):
 	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
@@ -43,8 +45,8 @@ def TMDBlist(index,url):
 	elif url == 'Popular': listdirs = tmdb.listmovies(links.link().tmdb_popular % (index),cachePath)
 	elif url == 'Upcoming': listdirs = tmdb.listmovies(links.link().tmdb_upcoming % (index),cachePath)
 	elif url == 'TopRated': listdirs = tmdb.listmovies(links.link().tmdb_top_rated % (index),cachePath)
-	for j in listdirs: addDir(j['label'],j['imdbid'],2,j['poster'],False,len(listdirs)+1,j['info'],'',j['imdbid'],j['year'],j['fanart_image'])
-	addDir('Next>>',url,7,'',True,len(listdirs)+1,'',int(index)+1,'','')
+	for j in listdirs: addDir(j['label'],j['imdbid'],2,j['poster'],False,len(listdirs)+1,j['info'],'',j['imdbid'],j['year'],j['originallabel'],j['fanart_image'])
+	addDir('Next>>',url,7,'',True,len(listdirs)+1,'',int(index)+1,'','','')
 	
 def IMDBlist(name,url):
 	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
@@ -72,7 +74,7 @@ def latestreleases(index):
 	[i.start() for i in threads]
 	[i.join() for i in threads]
 	populateDir(results,ranging,True)
-	addDir('Next>>','Next>>',3,'',True,1,'',ranging,'','')		
+	addDir('Next>>','Next>>',3,'',True,1,'',ranging,'','','')		
 
 def populateDir(results,ranging,cache=None):
 	unique_stuff = []
@@ -92,11 +94,11 @@ def populateDir(results,ranging,cache=None):
 		if cache:
 			if lists['label'].encode('utf-8') not in str(linecache):
 				basic.writefile(sitecachefile,"a",'::pageindex::'+str(ranging)+'::'+lists['label'].encode('utf-8')+'::\n')
-				if (getSetting('allyear') == 'true') or ((getSetting('allyear') == 'false') and (int(lists['info']['year']) >= int(getSetting('minyear')) and int(lists['info']['year']) <= int(getSetting('maxyear')))): addDir(lists['label'],lists['imdbid'],2,lists['poster'],False,len(result)+1,lists['info'],ranging,lists['imdbid'],lists['year'],lists['fanart_image'])
+				if (getSetting('allyear') == 'true') or ((getSetting('allyear') == 'false') and (int(lists['info']['year']) >= int(getSetting('minyear')) and int(lists['info']['year']) <= int(getSetting('maxyear')))): addDir(lists['label'],lists['imdbid'],2,lists['poster'],False,len(result)+1,lists['info'],ranging,lists['imdbid'],lists['year'],lists['originallabel'],lists['fanart_image'])
 			elif '::pageindex::'+str(ranging)+'::'+lists['label'].encode('utf-8') in str(linecache): 
-				if (getSetting('allyear') == 'true') or ((getSetting('allyear') == 'false') and (int(lists['info']['year']) >= int(getSetting('minyear')) and int(lists['info']['year']) <= int(getSetting('maxyear')))): addDir(lists['label'],lists['imdbid'],2,lists['poster'],False,len(result)+1,lists['info'],ranging,lists['imdbid'],lists['year'],lists['fanart_image'])
+				if (getSetting('allyear') == 'true') or ((getSetting('allyear') == 'false') and (int(lists['info']['year']) >= int(getSetting('minyear')) and int(lists['info']['year']) <= int(getSetting('maxyear')))): addDir(lists['label'],lists['imdbid'],2,lists['poster'],False,len(result)+1,lists['info'],ranging,lists['imdbid'],lists['year'],lists['originallabel'],lists['fanart_image'])
 		else:
-			if (getSetting('allyear') == 'true') or ((getSetting('allyear') == 'false') and (int(lists['info']['year']) >= int(getSetting('minyear')) and int(lists['info']['year']) <= int(getSetting('maxyear')))): addDir(lists['label'],lists['imdbid'],2,lists['poster'],False,len(result)+1,lists['info'],ranging,lists['imdbid'],lists['year'],lists['fanart_image'])		
+			if (getSetting('allyear') == 'true') or ((getSetting('allyear') == 'false') and (int(lists['info']['year']) >= int(getSetting('minyear')) and int(lists['info']['year']) <= int(getSetting('maxyear')))): addDir(lists['label'],lists['imdbid'],2,lists['poster'],False,len(result)+1,lists['info'],ranging,lists['imdbid'],lists['year'],lists['originallabel'],lists['fanart_image'])
 
 def getimdblinks(url,results,order,Source=None):
 	try:
@@ -117,8 +119,8 @@ def getimdblinks(url,results,order,Source=None):
 		return results
 	except BaseException as e: print '##ERROR-##getimdblinks: '+url+' '+str(e)
 	
-def addDir(name,url,mode,poster,pasta,total,info,index,imdb_id,year,fanart=None):
-	u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name.encode('ascii','xmlcharrefreplace'))+"&index="+str(index)+"&imdb_id="+str(imdb_id)+"&year="+str(year)
+def addDir(name,url,mode,poster,pasta,total,info,index,imdb_id,year,originalname,fanart=None):
+	u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name.encode('ascii','xmlcharrefreplace'))+"&originalname="+urllib.quote_plus(originalname)+"&index="+str(index)+"&imdb_id="+str(imdb_id)+"&year="+str(year)
 	ok=True
 	context = []
 	context.append(('Ver Trailer', 'RunPlugin(%s?mode=1&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
@@ -129,10 +131,10 @@ def addDir(name,url,mode,poster,pasta,total,info,index,imdb_id,year,fanart=None)
 	ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 	return ok
 
-def playparser(name, url, imdb_id, year):
+def playparser(original, url, imdb_id, year):
 	item = xbmcgui.ListItem(path=url)
 	item.setProperty("IsPlayable", "true")
-	xbmc.Player().play('plugin://plugin.video.genesis/?action=play&name='+name+'&title='+name+'&year='+year+'&imdb='+imdb_id+'&url='+url, item)
+	xbmc.Player().play('plugin://plugin.video.genesis/?action=play&name='+original+'&title='+original+'&year='+year+'&imdb='+imdb_id+'&url='+url, item)
 
 #trailer,sn
 def trailer(name, url):
@@ -376,6 +378,7 @@ def get_params():
 params=get_params()
 url=None
 name=None
+originalname=None
 mode=None
 iconimage=None
 index=None
@@ -385,6 +388,8 @@ year=None
 try: url=urllib.unquote_plus(params["url"])
 except: pass
 try: name=urllib.unquote_plus(params["name"])
+except: pass
+try: originalname=urllib.unquote_plus(params["originalname"])
 except: pass
 try: mode=int(params["mode"])
 except: pass
@@ -400,6 +405,7 @@ except: pass
 print "Mode: "+str(mode)
 print "URL: "+str(url)
 print "Name: "+str(name)
+print "OriginalName: "+str(originalname)
 print "Iconimage: "+str(iconimage)
 print "Index: "+str(index)
 print "imdb_id: "+str(imdb_id)
@@ -407,7 +413,9 @@ print "year: "+str(year)
 
 if mode==None or url==None or len(url)<1: MAIN()
 elif mode==1: trailer(name,url)
-elif mode==2: playparser(name,url,imdb_id,year)
+elif mode==2: 
+	try: addonsresolver.playparser(originalname,url,imdb_id,year)
+	except: print 'No addons resolver installed'
 elif mode==3: latestreleases(index)
 elif mode==4: IMDBmenu()
 elif mode==5: IMDBlist(name,url)

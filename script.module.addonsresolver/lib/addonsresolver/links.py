@@ -22,3 +22,5 @@ class link:
 		self.wt_base = base64.urlsafe_b64decode('aHR0cDovL3d3dy53YXJlenR1Z2EudHYvJXM=')
 		self.wt_play = base64.urlsafe_b64decode('cGx1Z2luOi8vcGx1Z2luLnZpZGVvLnd0Lz91cmw9JXMmbW9kZT01Jm5hbWU9JXM=')
 		self.wt_search = base64.urlsafe_b64decode('aHR0cDovL3d3dy53YXJlenR1Z2EudHYvcGFnaW5hdGlvbi5hamF4LnBocD9wPTEmb3JkZXI9ZGF0ZSZ3b3Jkcz0lcyZtZWRpYVR5cGU9bW92aWVz')
+		
+		self.yts_search = base64.urlsafe_b64decode('aHR0cHM6Ly95dHMucmUvYXBpL2xpc3RpbWRiLmpzb24/aW1kYl9pZD0lcw==')

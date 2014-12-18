@@ -5,7 +5,7 @@
 
 import xbmcplugin,xbmcgui,xbmc,xbmcaddon,os,threading,re,urllib
 from BeautifulSoup import BeautifulSoup
-from resources.libs import links,tmdb,basic
+from resources.libs import links,tmdb,imdb,youtube,basic
 AddonsResolver = True
 try: import addonsresolver
 except BaseException as e:
@@ -57,7 +57,7 @@ def TMDBlist(index,url):
 	
 def IMDBlist(name,url):
 	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
-	results = getimdblinks(url,[],1,'IMDB')
+	results = imdb.getlinks(url,[],1,'IMDB')
 	populateDir(results,1)
 	
 def latestreleases(index):
@@ -75,7 +75,7 @@ def latestreleases(index):
 	for i in range(ranging, ranging+int(getSetting('pages-num'))):
 		for site in sites: 
 			f = f + 1
-			threads.append(threading.Thread(name=site+str(i),target=getimdblinks,args=(site+str(i)+'/',results,f*100, )))
+			threads.append(threading.Thread(name=site+str(i),target=imdb.getlinks,args=(site+str(i)+'/',results,f*100, )))
 	ranging = i
 	[i.start() for i in threads]
 	[i.join() for i in threads]
@@ -106,25 +106,6 @@ def populateDir(results,ranging,cache=False):
 				if (getSetting('allyear') == 'true') or ((getSetting('allyear') == 'false') and (int(lists['info']['year']) >= int(getSetting('minyear')) and int(lists['info']['year']) <= int(getSetting('maxyear')))): addDir(lists['label'],lists['imdbid'],2,lists['poster'],False,len(result)+1,lists['info'],ranging,lists['imdbid'],lists['year'],lists['originallabel'],lists['fanart_image'])
 		else:
 			if (getSetting('allyear') == 'true') or ((getSetting('allyear') == 'false') and (int(lists['info']['year']) >= int(getSetting('minyear')) and int(lists['info']['year']) <= int(getSetting('maxyear')))): addDir(lists['label'],lists['imdbid'],2,lists['poster'],False,len(result)+1,lists['info'],ranging,lists['imdbid'],lists['year'],lists['originallabel'],lists['fanart_image'])
-
-def getimdblinks(url,results,order,Source=None):
-	try:
-		html_page = basic.open_url(url)
-		soup = BeautifulSoup(html_page)
-		if Source == 'IMDB':
-			for link in soup.findAll('a', attrs={'href': re.compile("^/title/.+?/\?ref_=.+?_ov_tt")}):
-				if '?' in link.get('href'): cleanlink = link.get('href').split("?")[0].split("title")[1].replace('/','')
-				else: cleanlink = link.get('href').split("title")[1].replace('/','')
-				results.append([order, cleanlink])
-				order += 1			
-		else:
-			for link in soup.findAll('a', attrs={'href': re.compile("^http://.+?/title/")}):
-				if '?' in link.get('href'): cleanlink = link.get('href').split("?")[0].split("/title/")[1].replace('/','')
-				else: cleanlink = link.get('href').split("title")[1].replace('/','')
-				results.append([order, cleanlink])
-				order += 1
-		return results
-	except BaseException as e: basic.log(u"imdb.getimdblinks ERROR: %s - %s" % (str(url),str(e)))
 	
 def addDir(name,url,mode,poster,pasta,total,info,index,imdb_id,year,originalname,fanart=None):
 	u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name.encode('ascii','xmlcharrefreplace'))+"&originalname="+urllib.quote_plus(originalname.encode('ascii','xmlcharrefreplace'))+"&index="+str(index)+"&imdb_id="+str(imdb_id)+"&year="+str(year)
@@ -146,18 +127,11 @@ def addDir(name,url,mode,poster,pasta,total,info,index,imdb_id,year,originalname
 def whattoplay(originalname,url,imdb_id,year):
 	try: url = xbmc.getInfoLabel('ListItem.Trailer').split('videoid=')[1]
 	except: url = ''
-	if AddonsResolver == False: playtrailer(url,originalname)
+	if AddonsResolver == False: youtube.playtrailer(url,originalname)
 	else:
-		if getSetting("playwhat") == 'Trailer': playtrailer(url,originalname)
+		if getSetting("playwhat") == 'Trailer': youtube.playtrailer(url,originalname)
 		else: addonsresolver.custom_choice(originalname,url,imdb_id,year)
-
-def playtrailer(url,name):
-	if url == None: return	
-	url = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % (url)
-	item = xbmcgui.ListItem(path=url)
-	item.setProperty("IsPlayable", "true")
-	xbmc.Player().play(url, item)
-	
+		
 def get_params():
         param=[]
         paramstring=sys.argv[2]
@@ -210,7 +184,7 @@ print "imdb_id: "+str(imdb_id)
 print "year: "+str(year)
 
 if mode==None or url==None or len(url)<1: MAIN()
-elif mode==1: playtrailer(url,name)
+elif mode==1: youtube.playtrailer(url,name)
 elif mode==2: whattoplay(originalname,url,imdb_id,year)
 elif mode==3: latestreleases(index)
 elif mode==4: IMDBmenu()

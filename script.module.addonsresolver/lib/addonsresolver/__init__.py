@@ -3,13 +3,27 @@
 # it under the terms of version 2 of the GNU General Public License as
 # published by the Free Software Foundation.
 # MafaStudios@gmail.com
-import basic,links,re,xbmcgui,xbmcaddon,xbmc,os,urllib
+import re,xbmcgui,xbmcaddon,xbmc,os,urllib,json
+import basic,links
 
 addon_id 		= 'script.module.addonsresolver'
 selfAddon 		= xbmcaddon.Addon(id=addon_id)
 getSetting 		= selfAddon.getSetting
 installfolder 	= xbmc.translatePath('special://home/addons')
 
+def ytssearch(imdb_id):
+	qualitychoice = xbmcgui.Dialog().select
+	quality = []
+	magnet = []
+	yts = basic.open_url(links.link().yts_search % (imdb_id))
+	jtys = json.loads(yts)
+	for j in jtys["MovieList"]:
+		quality.append(j["Quality"])
+		magnet.append(j["TorrentMagnetUrl"])
+	choose=qualitychoice('Seleccione a Qualidade',quality)
+	if choose > -1:
+		return magnet[choose]
+	
 def ratosearch(imdb_id):
 	ratos = basic.open_url(links.link().rato_search % (imdb_id))
 	try: siterato = re.compile('<span class="more-btn"><a href="(.+?)" >Ver Agora</a>').findall(ratos)[0]
@@ -17,7 +31,6 @@ def ratosearch(imdb_id):
 	return siterato
 
 def wtsearch(name):
-	print '#aki',links.link().wt_search % (urllib.quote_plus(name))
 	wt = basic.open_url(links.link().wt_search % (urllib.quote_plus(name)))
 	try: 
 		sitewt = re.compile('<a href="(.+?)" class="movie-name">').findall(wt)[0]

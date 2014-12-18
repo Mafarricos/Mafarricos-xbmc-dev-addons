@@ -4,14 +4,12 @@
 # This program is free software: GNU General Public License
 
 import os,json,urllib2
-from HTMLParser import HTMLParser
 
 def getKey(item):
 	return item[0]
 	
 def cleanTitle(title):
-	title = title.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&").replace("&#39;", "'").replace("&quot;", "\"").replace("&ndash;", "-")
-	title = title.replace('"',"")
+	title = title.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&").replace("&#39;", "'").replace("&quot;", "\"").replace("&ndash;", "-").replace('"',"").replace("’","'")
 	title = title.strip()
 	return title
 
@@ -75,3 +73,7 @@ def get_api_language():
 	if lang == "system": lang = xbmc.getLanguage(xbmc.ISO_639_1)
 	else: lang = xbmcaddon.Addon().getSetting('pref_language')
 	return lang
+
+def settings_open(id):
+	import xbmc
+	xbmc.executebuiltin('Addon.OpenSettings(%s)' % id)

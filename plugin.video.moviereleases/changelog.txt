@@ -1,3 +1,7 @@
+Version 0.0.4A
+- script.module.addonsresolver is needed to open external addons
+- new option to pass original movie title (cache needs to be cleaned)
+
 Version 0.0.3
 * 3rd alpha release
 - Caching tmdb info;

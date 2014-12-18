@@ -1,0 +1,3 @@
+Version 0.0.1
+* First addon release
+- RatoTV,Genesis and Sites_dos_Tugas

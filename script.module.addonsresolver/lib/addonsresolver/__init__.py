@@ -21,20 +21,7 @@ def playparser(name, url, imdb_id, year, addon):
 	item.setProperty("IsPlayable", "true")
 	if 'genesis' in addon: xbmc.Player().play(links.link().genesis_play % (name,name,year,imdb_id,url), item)
 	elif 'rato' in addon: xbmc.Player().play(links.link().rato_play % (url,name), item)
-	if 'portugas' in addon.lower():
-		
-		comando= links.link().sdp_search % (imdb_id,urllib.quote_plus(name.split("(")[0].strip()))
-		#xbmc.executebuiltin('XBMC.RunPlugin('+comando+')')
-		#xbmc.executebuiltin("RunPlugin(%s)"%(comando))
-		xbmc.executebuiltin('activatewindow(video,'+comando+')')
-		#item.setProperty("IsPlayable", "false")
-		#pluginpath = 'plugin://plugin.video.Sites_dos_Portugas/?url=IMDBtt2015381IMDB&mode=9000&name=Guardians+of+the+Galaxy&fanart=C%3A%5CUsers%5Cccorreia%5CAppData%5CRoaming%5CXBMC%5Caddons%5Cplugin.video.Sites_dos_Portugas%2Fresources%2Fimg%2FFAN3.jpg&checker=nao&iconimage=C%3A%5CUsers%5Cccorreia%5CAppData%5CRoaming%5CXBMC%5Caddons%5Cplugin.video.Sites_dos_Portugas%2Fresources%2Fimg%2FSERIES1.png'
-		#pluginpath = links.link().sdp_search % ('IMDB'+imdb_id+'IMDB',name.split("(")[0].strip())
-		#xbmc.executebuiltin('RunScript(%s)' % pluginpath)
-		#xbmc.executebuiltin('RunScript(plugin.video.Sites_dos_Portugas/?url=)')
-		#xbmc.executebuiltin('RunScript(plugin.video.synopsi, 0, mode=910&stv_id=2514500)')
-		#print links.link().sdp_search % ('IMDB'+imdb_id+'IMDB',name.split('(')[0].strip())
-		#xbmc.Player().play(links.link().sdp_search % ('IMDB'+imdb_id+'IMDB',name.split('(')[0].strip()), item)
+	if 'portugas' in addon.lower():	xbmc.executebuiltin('activatewindow(video,'+links.link().sdp_search % (imdb_id,urllib.quote_plus(name.split("(")[0].strip()))+')')
 	
 def custom_choice(name,url,imdb_id,year):
 	if getSetting("pref_addon") <> '-':

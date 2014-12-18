@@ -8,6 +8,7 @@ LANG = basic.get_api_language()
 getSetting          = xbmcaddon.Addon().getSetting
 
 def listmovies(url,cachePath):
+	basic.log(u"tmdb.listmovies url: %s" % url)
 	mainlist = []
 	sendlist = [] 
 	result = []
@@ -15,28 +16,27 @@ def listmovies(url,cachePath):
 	order = 0
 	jsonpage = basic.open_url(url)
 	j = json.loads(jsonpage)
-	#for list in j['results']: mainlist.append(searchmovie(list['id']))
 	for list in j['results']: 
 		order += 1
 		sendlist.append([order,list['id']])
-	##single thread
-	#searchmovielist(sendlist,result)
-	##mult thread
 	chunks=[sendlist[x:x+5] for x in xrange(0, len(sendlist), 5)]
 	for i in range(0,len(chunks)): threads.append(threading.Thread(name='listmovies'+str(i),target=searchmovielist,args=(chunks[i],result,cachePath, )))
 	[i.start() for i in threads]
 	[i.join() for i in threads]
 	result = sorted(result, key=basic.getKey)
 	for id,lists in result: mainlist.append(lists)
+	basic.log(u"tmdb.listmovies mainlist: %s" % mainlist)	
 	return mainlist
 
 def searchmovielist(list,result,cachePath):
+	basic.log(u"tmdb.searchmovielist list: %s" % list)
 	for num,id in list: 
 		moviedata = searchmovie(id,cachePath)
 		if moviedata: result.append([num,moviedata])
-
+	basic.log(u"tmdb.searchmovielist result: %s" % result)
+	
 def searchmovie(id,cachePath):
-	print id
+	basic.log(u"tmdb.searchmovie id: %s" % id)
 	listgenre = []
 	listcast = []
 	listcastr = []	
@@ -55,7 +55,11 @@ def searchmovie(id,cachePath):
 	jsonpage = basic.open_url(links.link().tmdb_info_default % (id))
 	if not jsonpage: jsonpage = basic.open_url(links.link().tmdb_info_default_alt % (id))
 	try: jdef = json.loads(jsonpage)
-	except: return False
+	except:
+		if 'tt' in str(id):
+			try: jdef = omdbapi.searchmovie(str(id),cachePath)
+			except: return False
+		else: return False
 	if LANG <> 'en':
 		try:
 			jsonpage = basic.open_url(links.link().tmdb_info % (id,LANG))
@@ -110,7 +114,7 @@ def searchmovie(id,cachePath):
 			break
 	duration = jdef['runtime']
 	if not poster and jdef['imdb_id']:
-		altsearch = omdbapi.searchmovie(jdef['imdb_id'])
+		altsearch = omdbapi.searchmovie(jdef['imdb_id'],cachePath,False)
 		poster = altsearch['poster']
 		if not fanart: fanart = poster
 		if not plot: plot = altsearch['info']['plot']

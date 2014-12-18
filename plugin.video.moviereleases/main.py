@@ -3,13 +3,13 @@
 # email: MafaStudios@gmail.com
 # This program is free software: GNU General Public License
 
-import xbmcplugin,xbmcgui,xbmc,xbmcaddon,os,threading,re,urllib,base64
+import xbmcplugin,xbmcgui,xbmc,xbmcaddon,os,threading,re,urllib
 from BeautifulSoup import BeautifulSoup
 from resources.libs import links,tmdb,basic
 AddonsResolver = True
 try: import addonsresolver
-except BaseException as e: 
-	print '##ERROR-addonsresolver: '+str(e)
+except BaseException as e:
+	basic.log(u"main.AddonsResolver exception: %s" % str(e)) 
 	AddonsResolver = False
 
 addonName           = xbmcaddon.Addon().getAddonInfo("name")
@@ -95,7 +95,7 @@ def populateDir(results,ranging,cache=False):
 	[i.start() for i in threads2]
 	[i.join() for i in threads2]
 	result = sorted(result, key=basic.getKey)
-	print '#fim',result
+	basic.log(u"main.populateDir result: %s" % result)
 	if cache: linecache= basic.readalllines(sitecachefile)
 	for id,lists in result:
 		if cache:
@@ -124,7 +124,7 @@ def getimdblinks(url,results,order,Source=None):
 				results.append([order, cleanlink])
 				order += 1
 		return results
-	except BaseException as e: print '##ERROR-##getimdblinks: '+url+' '+str(e)
+	except BaseException as e: basic.log(u"imdb.getimdblinks ERROR: %s - %s" % (str(url),str(e)))
 	
 def addDir(name,url,mode,poster,pasta,total,info,index,imdb_id,year,originalname,fanart=None):
 	u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name.encode('ascii','xmlcharrefreplace'))+"&originalname="+urllib.quote_plus(originalname.encode('ascii','xmlcharrefreplace'))+"&index="+str(index)+"&imdb_id="+str(imdb_id)+"&year="+str(year)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
 <category label="General">
-<setting id="pref_addon" type="select" label="Addon Preferencial" values="-|Genesis|RatoTV|SiteDosPortugas" default="-" />
+<setting id="pref_addon" type="select" label="Addon Preferencial" values="-|Genesis|RatoTV|SiteDosPortugas|WT" default="-" />
 </category>
 <category label="Genesis">
 <setting id="genesis_enabled" type="bool" label="Enabled" default="true"/>
@@ -11,5 +11,8 @@
 </category>
 <category label="Site dos Portugas">
 <setting id="sdp_enabled" type="bool" label="Enabled" default="true"/>
+</category>
+<category label="WarezTuga">
+<setting id="wt_enabled" type="bool" label="Enabled" default="true"/>
 </category>
 </settings>

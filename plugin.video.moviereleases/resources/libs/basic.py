@@ -3,7 +3,9 @@
 # email: MafaStudios@gmail.com
 # This program is free software: GNU General Public License
 
-import os,json,urllib2
+import os,json,urllib2,xbmcaddon,xbmc
+__name__	= xbmcaddon.Addon().getAddonInfo("id")
+debug 		= xbmcaddon.Addon().getSetting('debug_mode')
 
 def getKey(item):
 	return item[0]
@@ -23,7 +25,7 @@ def open_url(url, encoding='utf-8'):
 		response.close()
 		if encoding != 'utf-8': link = link.decode(encoding).encode('utf-8')
 		return link
-	except BaseException as e: print '##ERROR-moviereleases:open_url: '+str(url)+' '+str(e)	
+	except BaseException as e: log(u"open_url ERROR: %s - %s" % (str(url),str(e)))
 	
 def listsites(sitesfile):
 	list = []
@@ -64,12 +66,10 @@ def removecache(cachePath):
 			for f in files:
 				if not '_cache' in f: os.unlink(os.path.join(root, f))
 		return 'Eliminação Completa.'
-	except BaseException as e: return str(e)
+	except BaseException as e: log(u"removecache ERROR: %s" % (str(e)))
 
 def get_api_language():
-	import xbmc
-	import xbmcaddon
-	lang = xbmcaddon.Addon().getSetting('pref_language')
+	lang = xbmcaddon.Addon().getSetting('pref_language')	
 	if lang == "system": lang = xbmc.getLanguage(xbmc.ISO_639_1)
 	else: lang = xbmcaddon.Addon().getSetting('pref_language')
 	return lang
@@ -77,3 +77,10 @@ def get_api_language():
 def settings_open(id):
 	import xbmc
 	xbmc.executebuiltin('Addon.OpenSettings(%s)' % id)
+	
+def _log(module, msg):
+	s = u"#[%s] - %s" % (module, msg)
+	xbmc.log(s.encode('utf-8'), level=xbmc.LOGDEBUG)
+
+def log(msg):
+	if debug == 'true': _log(__name__, msg)

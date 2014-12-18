@@ -31,9 +31,12 @@ def listmovies(url,cachePath):
 	return mainlist
 
 def searchmovielist(list,result,cachePath):
-	for num,id in list: result.append([num,searchmovie(id,cachePath)])
+	for num,id in list: 
+		moviedata = searchmovie(id,cachePath)
+		if moviedata: result.append([num,moviedata])
 
 def searchmovie(id,cachePath):
+	print id
 	listgenre = []
 	listcast = []
 	listcastr = []	
@@ -52,7 +55,7 @@ def searchmovie(id,cachePath):
 	jsonpage = basic.open_url(links.link().tmdb_info_default % (id))
 	if not jsonpage: jsonpage = basic.open_url(links.link().tmdb_info_default_alt % (id))
 	try: jdef = json.loads(jsonpage)
-	except: jdef = ''
+	except: return False
 	if LANG <> 'en':
 		try:
 			jsonpage = basic.open_url(links.link().tmdb_info % (id,LANG))
@@ -120,9 +123,9 @@ def searchmovie(id,cachePath):
 		if not director: director = altsearch['info']['director']		
 		if not genre: genre = altsearch['info']['genre']
 	response = {
-        "label": '%s (%s)' % (title,year),
-        "originallabel": '%s (%s)' % (jdef['original_title'],year),		
-        "poster": poster,
+		"label": '%s (%s)' % (title,year),
+		"originallabel": '%s (%s)' % (jdef['original_title'],year),		
+		"poster": poster,
 		"fanart_image": fanart,
 		"imdbid": jdef['imdb_id'],
 		"year": year,

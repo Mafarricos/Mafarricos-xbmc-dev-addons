@@ -82,7 +82,7 @@ def latestreleases(index):
 	populateDir(results,ranging,True)
 	addDir('Next>>','Next>>',3,'',True,1,'',ranging,'','','')		
 
-def populateDir(results,ranging,cache=None):
+def populateDir(results,ranging,cache=False):
 	unique_stuff = []
 	threads2 = []	
 	result = []
@@ -95,6 +95,7 @@ def populateDir(results,ranging,cache=None):
 	[i.start() for i in threads2]
 	[i.join() for i in threads2]
 	result = sorted(result, key=basic.getKey)
+	print '#fim',result
 	if cache: linecache= basic.readalllines(sitecachefile)
 	for id,lists in result:
 		if cache:
@@ -117,7 +118,7 @@ def getimdblinks(url,results,order,Source=None):
 				results.append([order, cleanlink])
 				order += 1			
 		else:
-			for link in soup.findAll('a', attrs={'href': re.compile("^http://.+?/title")}):
+			for link in soup.findAll('a', attrs={'href': re.compile("^http://.+?/title/")}):
 				if '?' in link.get('href'): cleanlink = link.get('href').split("?")[0].split("/title/")[1].replace('/','')
 				else: cleanlink = link.get('href').split("title")[1].replace('/','')
 				results.append([order, cleanlink])
@@ -153,7 +154,6 @@ def whattoplay(originalname,url,imdb_id,year):
 def playtrailer(url,name):
 	if url == None: return	
 	url = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % (url)
-	print url
 	item = xbmcgui.ListItem(path=url)
 	item.setProperty("IsPlayable", "true")
 	xbmc.Player().play(url, item)

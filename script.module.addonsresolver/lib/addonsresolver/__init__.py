@@ -59,7 +59,8 @@ def playparser(name, url, imdb_id, year, addon):
 			q = qual
 			m = magnet
 		choose=qualitychoice('Seleccione a Qualidade',q)
-		if choose > -1:	xbmc.Player().play(links.link().kmediatorrent_play % (urllib.quote_plus(m[choose])), item)
+		url = links.link().kmediatorrent_play % (urllib.quote_plus(m[choose]))
+		if choose > -1:	xbmc.Player().play(url,item)		
 	elif 'stream' in addon.lower():
 		qualitychoice = xbmcgui.Dialog().select
 		q = []
@@ -68,10 +69,9 @@ def playparser(name, url, imdb_id, year, addon):
 			q = qual
 			m = magnet
 		choose=qualitychoice('Seleccione a Qualidade',q)
-		comando='plugin://plugin.video.stream/play/' + m[choose]
-		#xbmc.executebuiltin("RunPlugin(%s)"%('plugin://'))
-		if choose > -1:	xbmc.Player().play(links.link().stream_play % (m[choose]), item)
-	
+		url = links.link().stream_play % (urllib.quote_plus(m[choose]))
+		if choose > -1:	xbmc.Player().play(url,item)
+
 def custom_choice(name,url,imdb_id,year):
 	if getSetting("pref_addon") <> '-':
 		if 'rato' in getSetting("pref_addon").lower(): url = ratosearch(imdb_id)

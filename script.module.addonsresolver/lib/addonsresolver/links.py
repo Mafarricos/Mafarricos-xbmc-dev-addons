@@ -26,7 +26,7 @@ class link:
 		self.yts_search = base64.urlsafe_b64decode('aHR0cHM6Ly95dHMucmUvYXBpL2xpc3RpbWRiLmpzb24/aW1kYl9pZD0lcw==')
 		
 		self.kmediatorrent_id = 'plugin.video.kmediatorrent'
-		self.kmediatorrent_play = base64.urlsafe_b64decode('cGx1Z2luOi8vcGx1Z2luLnZpZGVvLmtvZGl0b3JyZW50L3BsYXkvJXM=')
+		self.kmediatorrent_play = base64.urlsafe_b64decode('cGx1Z2luOi8vcGx1Z2luLnZpZGVvLmttZWRpYXRvcnJlbnQvcGxheS8lcw==')
 		
 		self.stream_id = 'plugin.video.stream'
 		self.stream_play = base64.urlsafe_b64decode('cGx1Z2luOi8vcGx1Z2luLnZpZGVvLnN0cmVhbS9wbGF5LyVz')

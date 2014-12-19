@@ -51,7 +51,7 @@ def searchmovie(id,cachePath):
 	fanart = ''
 	duration = ''
 	videocache = os.path.join(cachePath,str(id))
-	if os.path.isfile(videocache): return json.loads(basic.readfiletoJSON(videocache))
+	return json.loads(basic.readfiletoJSON(videocache))
 	jsonpage = basic.open_url(links.link().tmdb_info_default % (id))
 	if not jsonpage: jsonpage = basic.open_url(links.link().tmdb_info_default_alt % (id))
 	try: jdef = json.loads(jsonpage)
@@ -125,7 +125,7 @@ def searchmovie(id,cachePath):
 		if not duration: duration = altsearch['info']['duration']
 		if not writer: writer = altsearch['info']['writer']
 		if not director: director = altsearch['info']['director']		
-		if not genre: genre = altsearch['info']['genre']
+		if not genre: genre = altsearch['info']['genre']		
 	response = {
 		"label": '%s (%s)' % (title,year),
 		"originallabel": '%s (%s)' % (jdef['original_title'],year),		
@@ -155,5 +155,18 @@ def searchmovie(id,cachePath):
 			"trailer": trailer
 			}
 		}
+	try:
+		from metahandler import metahandlers
+		metaget = metahandlers.MetaData(preparezip=False)
+	except: pass
+	try:
+		playcount = metaget._get_watched('movie', jdef['imdb_id'], '', '')
+		if playcount == 7: response.update({'playcount': 1, 'overlay': 7})
+		else: response.update({'playcount': 0, 'overlay': 6})
+	except: pass
+	try:
+		playcount = [i for i in indicators if i['imdb_id'] == jdef['imdb_id']][0]
+		response.update({'playcount': 1, 'overlay': 7})
+	except: pass		
 	if getSetting("cachesites") == 'true': basic.writefile(videocache,'w',json.dumps(response))
 	return response

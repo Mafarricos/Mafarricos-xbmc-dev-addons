@@ -3,14 +3,14 @@
 # email: MafaStudios@gmail.com
 # This program is free software: GNU General Public License
 
-import xbmcplugin,xbmcgui,xbmc,xbmcaddon,os,threading,re,urllib
+import xbmcplugin,xbmcgui,xbmc,xbmcaddon,os,threading,re,urllib,json
 from BeautifulSoup import BeautifulSoup
 from resources.libs import links,tmdb,imdb,youtube,basic
 AddonsResolver = True
-try: import addonsresolver
-except BaseException as e:
-	basic.log(u"main.AddonsResolver exception: %s" % str(e)) 
-	AddonsResolver = False
+import addonsresolver
+#except BaseException as e:
+#	basic.log(u"main.AddonsResolver ##Error: %s" % str(e)) 
+#	AddonsResolver = False
 
 addonName           = xbmcaddon.Addon().getAddonInfo("name")
 addonVersion        = xbmcaddon.Addon().getAddonInfo("version")
@@ -46,7 +46,7 @@ def TMDBmenu():
 	addDir('Top Rated','TopRated',7,'',True,4,'',1,'','','')
 
 def TMDBlist(index,url):
-	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
+	#xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
 	listdirs = []
 	if url == 'Theaters': listdirs = tmdb.listmovies(links.link().tmdb_theaters % (index),cachePath)
 	elif url == 'Popular': listdirs = tmdb.listmovies(links.link().tmdb_popular % (index),cachePath)
@@ -56,7 +56,7 @@ def TMDBlist(index,url):
 	addDir('Next>>',url,7,'',True,len(listdirs)+1,'',int(index)+1,'','','')
 	
 def IMDBlist(name,url):
-	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
+	#xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
 	results = imdb.getlinks(url,[],1,'IMDB')
 	populateDir(results,1)
 	
@@ -64,7 +64,7 @@ def latestreleases(index):
 	sites = []
 	for i in range(1, 15):
 		if getSetting("site"+str(i)+"on") == 'true': sites.append(getSetting("site"+str(i)))
-	xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
+	#xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
 	threads = []
 	f = 0	
 	results = []
@@ -113,6 +113,21 @@ def addDir(name,url,mode,poster,pasta,total,info,index,imdb_id,year,originalname
 	context = []
 	liz=xbmcgui.ListItem(name, iconImage=poster, thumbnailImage=poster)
 	liz.setProperty('fanart_image',fanart)
+
+	try:
+		from metahandler import metahandlers
+		metaget = metahandlers.MetaData(preparezip=False)
+	except: pass
+	try:
+		playcount = metaget._get_watched('movie', imdb_id, '', '')
+		if playcount == 7: info.update({'playcount': 1, 'overlay': 7})
+		else: info.update({'playcount': 0, 'overlay': 6})
+	except: pass
+	try:
+		playcount = [i for i in indicators if i['imdb_id'] == imdb_id][0]
+		info.update({'playcount': 1, 'overlay': 7})
+	except: pass	
+		
 	if info <> '': 
 		liz.setInfo( type="Video", infoLabels=info )
 		try:
@@ -121,7 +136,8 @@ def addDir(name,url,mode,poster,pasta,total,info,index,imdb_id,year,originalname
 		except: pass
 		context.append(('Informação', 'Action(Info)'))
 	liz.addContextMenuItems(context, replaceItems=False)
-	ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
+	ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
+	xbmcplugin.setContent(int(sys.argv[1]), 'movies')
 	return ok
 
 def whattoplay(originalname,url,imdb_id,year):

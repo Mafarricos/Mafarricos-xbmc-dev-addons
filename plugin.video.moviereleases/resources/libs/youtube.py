@@ -12,7 +12,7 @@ def searchtrailer(name):
 	
 def playtrailer(url,name):
 	if url == None: return	
-	url = youtube_plugin % (url)
+	url = links.link().youtube_plugin % (url)
 	item = xbmcgui.ListItem(path=url)
 	item.setProperty("IsPlayable", "true")
 	xbmc.Player().play(url, item)

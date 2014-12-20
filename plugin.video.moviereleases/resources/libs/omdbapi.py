@@ -50,9 +50,9 @@ def searchmovie(id,cachePath,cache=True):
 	fanart = ''
 	trailer = ''
 	year = ''
+	videocache = os.path.join(cachePath,str(id))	
 	if cache:
-		videocache = os.path.join(cachePath,str(id))
-		if os.path.isfile(videocache): return json.loads(basic.readfiletoJSON(videocache))	
+		if getSetting("cachesites") == 'true' and os.path.isfile(videocache): return json.loads(basic.readfiletoJSON(videocache))
 	jsonpage = basic.open_url(links.link().omdbapi_info % (id))
 	jdef = json.loads(jsonpage)
 	title = jdef['Title']		
@@ -99,5 +99,5 @@ def searchmovie(id,cachePath,cache=True):
 			}
 		}
 	if cache:
-		if getSetting("cachesites") == 'true': basic.writefile(videocache,'w',json.dumps(response))
+		if getSetting("cachesites") == 'true' and not os.path.isfile(videocache): basic.writefile(videocache,'w',json.dumps(response))
 	return response		

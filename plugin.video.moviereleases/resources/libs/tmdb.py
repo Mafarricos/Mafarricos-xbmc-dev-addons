@@ -51,7 +51,7 @@ def searchmovie(id,cachePath):
 	fanart = ''
 	duration = ''
 	videocache = os.path.join(cachePath,str(id))
-	return json.loads(basic.readfiletoJSON(videocache))
+	if getSetting("cachesites") == 'true' and os.path.isfile(videocache): return json.loads(basic.readfiletoJSON(videocache))
 	jsonpage = basic.open_url(links.link().tmdb_info_default % (id))
 	if not jsonpage: jsonpage = basic.open_url(links.link().tmdb_info_default_alt % (id))
 	try: jdef = json.loads(jsonpage)
@@ -168,5 +168,5 @@ def searchmovie(id,cachePath):
 		playcount = [i for i in indicators if i['imdb_id'] == jdef['imdb_id']][0]
 		response.update({'playcount': 1, 'overlay': 7})
 	except: pass		
-	if getSetting("cachesites") == 'true': basic.writefile(videocache,'w',json.dumps(response))
+	if getSetting("cachesites") == 'true' and not os.path.isfile(videocache): basic.writefile(videocache,'w',json.dumps(response))
 	return response

@@ -46,7 +46,7 @@ def playparser(name, url, imdb_id, year, addon):
 	if 'kmediatorrent' or 'stream' in addon: item = xbmcgui.ListItem(path=imdb_id)
 	else: item = xbmcgui.ListItem(path=url)
 	item.setProperty("IsPlayable", "true")
-	if 'genesis' in addon: xbmc.Player().play(links.link().genesis_play % (name,name,year,imdb_id,url), item)
+	if 'genesis' in addon: xbmc.Player().play(links.link().genesis_play % (urllib.quote_plus(name),urllib.quote_plus(name),year,imdb_id.strip('tt'),url), item)
 	elif 'rato' in addon: xbmc.Player().play(links.link().rato_play % (url,name), item)
 	elif 'wt' in addon: 
 		xbmc.Player().play(links.link().wt_play % (urllib.quote_plus(url),urllib.quote_plus(name)), item)	

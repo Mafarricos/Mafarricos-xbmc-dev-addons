@@ -7,10 +7,10 @@ import xbmcplugin,xbmcgui,xbmc,xbmcaddon,os,threading,re,urllib,json
 from BeautifulSoup import BeautifulSoup
 from resources.libs import links,tmdb,imdb,youtube,basic
 AddonsResolver = True
-import addonsresolver
-#except BaseException as e:
-#	basic.log(u"main.AddonsResolver ##Error: %s" % str(e)) 
-#	AddonsResolver = False
+try: import addonsresolver
+except BaseException as e:
+	basic.log(u"main.AddonsResolver ##Error: %s" % str(e)) 
+	AddonsResolver = False
 
 addonName           = xbmcaddon.Addon().getAddonInfo("name")
 addonVersion        = xbmcaddon.Addon().getAddonInfo("version")
@@ -29,6 +29,7 @@ def MAIN():
 	addDir('Latest Releases','Latest Releases',3,'',True,4,'',0,'','','')
 	addDir('TMDB','TMDB',6,'',True,4,'',0,'','','')	
 	addDir('IMDB','IMDB',4,'',True,4,'',0,'','','')
+	addDir('Search Movie','search',7,'',True,4,'',0,'','','')	
 	addDir('Tools','Tools',9,'',True,4,'',0,'','','')
 
 def ToolsMenu():
@@ -36,27 +37,59 @@ def ToolsMenu():
 	if AddonsResolver: addDir('AddonsResolver Settings','Settings',10,'',False,2,'',0,'','','')
 
 def IMDBmenu():
-	addDir('In Theaters','http://www.imdb.com/movies-in-theaters/',5,'',True,2,'','','','','')
-	addDir('Comming Soon','http://www.imdb.com/movies-coming-soon/',5,'',True,2,'','','','','')
-
+	addDir('Top 250','top250',11,'',True,8,'','','','','')
+	addDir('Bottom 100','bot100',11,'',True,8,'','','','','')	
+	addDir('In Theaters','theaters',11,'',True,8,'','','','','')
+	addDir('Comming Soon','comming_soon',11,'',True,8,'','','','','')
+	addDir('US Box Office','boxoffice',11,'',True,8,'',1,'','','')
+	addDir('Most Voted','most_voted',11,'',True,8,'',1,'','','')
+	addDir('Oscars','oscars',11,'',True,8,'',1,'','','')
+	addDir('Popular','popular',11,'',True,8,'',1,'','','')
+	addDir('Popular by Genre','popularbygenre',11,'',True,8,'',1,'','','')	
+	
 def TMDBmenu():
-	addDir('In Theaters','Theaters',7,'',True,4,'',1,'','','')
-	addDir('Upcoming','Upcoming',7,'',True,4,'',1,'','','')
-	addDir('Popular','Popular',7,'',True,4,'',1,'','','')
-	addDir('Top Rated','TopRated',7,'',True,4,'',1,'','','')
+	addDir('In Theaters','Theaters',7,'',True,5,'',1,'','','')
+	addDir('Upcoming','Upcoming',7,'',True,5,'',1,'','','')
+	addDir('Popular','Popular',7,'',True,5,'',1,'','','')
+	addDir('Top Rated','TopRated',7,'',True,5,'',1,'','','')
+	addDir('Discover by popularity','discoverpop',7,'',True,5,'',1,'','','')	
 
 def TMDBlist(index,url):
-	#xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
 	listdirs = []
-	if url == 'Theaters': listdirs = tmdb.listmovies(links.link().tmdb_theaters % (index),cachePath)
+	if url == 'search':
+		keyb = xbmc.Keyboard('', 'Escreva o parâmetro de pesquisa')
+		keyb.doModal()
+		if (keyb.isConfirmed()):
+			search = keyb.getText()
+			encode=urllib.quote(search)
+			listdirs = tmdb.listmovies(links.link().tmdb_search % (encode),cachePath)	
+	elif url == 'discoverpop': listdirs = tmdb.listmovies(links.link().tmdb_discover % (index),cachePath)
+	elif url == 'Theaters': listdirs = tmdb.listmovies(links.link().tmdb_theaters % (index),cachePath)
 	elif url == 'Popular': listdirs = tmdb.listmovies(links.link().tmdb_popular % (index),cachePath)
 	elif url == 'Upcoming': listdirs = tmdb.listmovies(links.link().tmdb_upcoming % (index),cachePath)
 	elif url == 'TopRated': listdirs = tmdb.listmovies(links.link().tmdb_top_rated % (index),cachePath)
 	for j in listdirs: addDir(j['label'],j['imdbid'],2,j['poster'],False,len(listdirs)+1,j['info'],'',j['imdbid'],j['year'],j['originallabel'],j['fanart_image'])
-	addDir('Next>>',url,7,'',True,len(listdirs)+1,'',int(index)+1,'','','')
+	if url <> 'search': addDir('Next>>',url,7,'',True,len(listdirs)+1,'',int(index)+1,'','','')
+
+def IMDBlist2(index,url,originalname):
+	listdirs = []
+	if url == 'top250': listdirs = imdb.listmovies(links.link().imdb_top250,cachePath)
+	elif url == 'bot100': listdirs = imdb.listmovies(links.link().imdb_bot100,cachePath)	
+	elif url == 'boxoffice': listdirs = imdb.listmovies(links.link().imdb_boxoffice % (index),cachePath)
+	elif url == 'most_voted': listdirs = imdb.listmovies(links.link().imdb_most_voted % (index),cachePath)
+	elif url == 'oscars': listdirs = imdb.listmovies(links.link().imdb_oscars % (index),cachePath)
+	elif url == 'popular': listdirs = imdb.listmovies(links.link().imdb_popular % (index),cachePath)
+	elif url == 'theaters': listdirs = imdb.listmovies(links.link().imdb_theaters,cachePath)
+	elif url == 'comming_soon': listdirs = imdb.listmovies(links.link().imdb_comming_soon,cachePath)	
+	elif url == 'popularbygenre': 
+		if index == '1': originalname = imdb.getgenre(links.link().imdb_genre)
+		listdirs = imdb.listmovies(links.link().imdb_popularbygenre % (index,originalname),cachePath)	
+	for j in listdirs: addDir(j['label'],j['imdbid'],2,j['poster'],False,len(listdirs)+1,j['info'],'',j['imdbid'],j['year'],j['originallabel'],j['fanart_image'])
+	if url <> 'top250' and url <> 'bot100' and url <> 'theaters' and url <> 'comming_soon': 
+		if url == 'popularbygenre': addDir('Next>>',url,11,'',True,len(listdirs)+1,'',int(index)+30,'','',originalname,'')
+		else: addDir('Next>>',url,11,'',True,len(listdirs)+1,'',int(index)+30,'','','','')
 	
 def IMDBlist(name,url):
-	#xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
 	results = imdb.getlinks(url,[],1,'IMDB')
 	populateDir(results,1)
 	
@@ -64,7 +97,6 @@ def latestreleases(index):
 	sites = []
 	for i in range(1, 15):
 		if getSetting("site"+str(i)+"on") == 'true': sites.append(getSetting("site"+str(i)))
-	#xbmcplugin.setContent(int(sys.argv[1]), 'Movies')
 	threads = []
 	f = 0	
 	results = []
@@ -210,4 +242,5 @@ elif mode==7: TMDBlist(index,url)
 elif mode==8: xbmcgui.Dialog().ok('Cache',basic.removecache(cachePath))
 elif mode==9: ToolsMenu()
 elif mode==10: basic.settings_open('script.module.addonsresolver')
+elif mode==11: IMDBlist2(index,url,originalname)
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

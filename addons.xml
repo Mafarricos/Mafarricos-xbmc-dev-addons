@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
+<addon id="plugin.video.abelhas"
+       name="Abelhas.pt e Minhateca"
+       version="1.0.1"
+       provider-name="fightnight">
+    <requires>
+        <import addon="xbmc.python" version="2.1.0"/>
+	<import addon="script.module.t0mm0.common" version="1.0.0"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary>Conteudos do site Abelhas.pt e Minhateca no Kodi</summary>
+        <description>Ve os teus conteudos e os da comunidade abelhas/minhateca no Kodi.</description>
+        <platform>all</platform>
+    </extension>
+</addon>
+
 <addon id="plugin.video.cinecartaz" name="Cinecartaz" version="0.0.1" provider-name="Mafarricos">
 	<requires>
     <import addon="xbmc.python" version="2.14.0"/>

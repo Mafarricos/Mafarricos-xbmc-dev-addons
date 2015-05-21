@@ -8,8 +8,6 @@ from t0mm0.common.net import Net
 net=Net()
 
 ####################################################### CONSTANTES #####################################################
-
-versao = '1.0.1'
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
 MinhaMainURL = 'http://minhateca.com.br/'
@@ -26,6 +24,7 @@ pastaperfil = xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-
 cookies = os.path.join(pastaperfil, "cookies.lwp")
 username_ab = urllib.quote(selfAddon.getSetting('abelhas-username'))
 username_mt = urllib.quote(selfAddon.getSetting('minhateca-username'))
+MainPlayList = []
 
 #################################################### LOGIN ABELHAS #####################################################
 def login(defora=False):
@@ -60,7 +59,6 @@ def login(defora=False):
 		else: return selfAddon.setSetting(label[x]+'-check',"true")
 
 ################################################### MENUS PLUGIN ######################################################
-
 def menu_principal(ligacao):
       global MainPlayList
       MainPlaylist = []
@@ -190,7 +188,7 @@ def atalhos(type=False):
                   elif ftype=='folder': addDir('%s (%s)' % (fname,path),furl,3,wtpath + art + 'pasta.png',len(lista),True,atalhos=atal)
                   xbmc.executebuiltin("Container.SetViewMode(51)")
 
-def pastas(url,name,formcont={},conteudo='',past=False):
+def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
       if re.search('minhateca.com.br',url):
             sitebase=MinhaMainURL
             host='minhateca.com.br'
@@ -210,7 +208,7 @@ def pastas(url,name,formcont={},conteudo='',past=False):
                   except: ftype='All'
                   pagina=1
                   token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
-                  form_d = {'IsGallery':'True','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
+                  form_d = {'IsGallery':'False','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
                   from t0mm0.common.addon import Addon
                   addon=Addon(addon_id)
                   addon.save_data('temp.txt',form_d)
@@ -220,7 +218,7 @@ def pastas(url,name,formcont={},conteudo='',past=False):
             except: pass          
       else:
             if conteudo=='':
-                  extra='?requestedFolderMode=filesList&fileListSortType=Name&fileListAscending=True'
+                  extra='?IsGallery=False&requestedFolderMode=filesList&fileListSortType=Size&fileListAscending=False'
                   conteudo=clean(abrir_url_cookie(url + extra))
       if re.search('ProtectedFolderChomikLogin',conteudo):
             chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
@@ -272,47 +270,18 @@ def pastas(url,name,formcont={},conteudo='',past=False):
                         addDir('[B][COLOR white]' + nomepasta + '[/COLOR][/B]' + displock,sitebase + urlpasta,3,wtpath + art + 'pasta.png',len(seleccionados),True)
             except: pass
             reslist = []
-            #contributo mafarricos com alteracoes, ty
-            items1=re.compile('<a class="expanderHeader downloadAction" href="(.+?)" title="(.+?)">.+?</span>(.+?)</a>.+?<li><span>(.+?)</span></li>.+?<span class="downloadsCounter">.+?<li>(.+?)</li>').findall(conteudo)
-            for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items1:
-                  extensao=extensao.replace(' ','')
-                  tamanhoficheiro=tamanhoficheiro.replace(' ','')
-                  tamanhoparavariavel=' (' + tamanhoficheiro + ')'
-                  thumb=GetThumbExt(extensao)
-                  if past==False: modo=4
-                  else: modo=22
-                  reslist = SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,modo,thumb,past,reslist)
-            #contributo mafarricos com alteracoes, ty
-            items2=re.compile('<a class="downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
-            for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2:
-                  thumb=GetThumbExt(extensao)
-                  tamanhoparavariavel=' (' + tamanhoficheiro + ')'
-                  if past==False: modo=4
-                  else: modo=22
-                  reslist = SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,modo,thumb,past,reslist)
-            if not items1:
-                  if not items2:
-                        conteudo=clean(conteudo)
-                        #isto ta feio
-                        items3=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
-                        for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3:
-                              tamanhoficheiro=tamanhoficheiro.replace(' ','')
-                              tituloficheiro=tituloficheiro.replace(str(extensao),'')
-                              tamanhoparavariavel=' (' + tamanhoficheiro + ')'
-                              thumb=GetThumbExt(extensao)
-                              if past==False: modo=4
-                              else: modo=22
-                              reslist = SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,modo,thumb,past,reslist)
+            reslist = ReturnConteudo(conteudo,past,color)
             if reslist:
 				reslist = sorted(reslist, key=getKey,reverse=True)
 				global MainPlaylist
 				for part1,part2 in reslist: 
 					MainPlayList.append([part2[1],sitebase + part2[4]])
-					addCont('[B][COLOR '+part2[0]+']' + part2[1] + part2[2] + '[/COLOR][/B]' + '[COLOR white]' + part2[3] + '[/COLOR]',sitebase + part2[4],part2[5],part2[3],part2[6],len(reslist),part2[7],False)
+					addCont('[B][COLOR '+part2[0]+']' + part2[1].replace(part2[2],'') + part2[2] + '[/COLOR][/B]' + '[COLOR white]' + part2[3] + '[/COLOR]',sitebase + part2[4],part2[5],part2[3],part2[6],len(reslist))
 				savefile('playlist.txt',str(MainPlayList))
             paginas(conteudo)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
+#Mafarricos,sn - Novas alterações
 def GetThumbExt(extensao):
 	extensao=extensao.replace(' ','').lower()
 	if extensao=='.rar' or extensao == '.zip' or extensao=='.7z': return wtpath + art + 'rar.png'
@@ -321,8 +290,30 @@ def GetThumbExt(extensao):
 	elif extensao=='.mkv' or extensao == '.ogm' or extensao == '.avi' or extensao=='.mp4' or extensao=='.3gp' or extensao=='.wmv' or extensao=='.mpg' or extensao=='.mpeg': return wtpath + art + 'video.png'
 	else: return wtpath + art + 'file.png'
 
-#Mafarricos,sn - Ordenação da pesquisa por tamanho de ficheiro
-def SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,modo,thumb,past,reslist):
+def ReturnConteudo(conteudo,past,color):
+	diffItems = False
+	reslist = []
+	section = re.compile('<div class="filerow fileItemContainer">(.+?)</ul></div>    </div>', re.DOTALL).findall(conteudo)
+	if not section: section = re.compile('<div class="filerow fileItemContainer">(.+?)</div></div>', re.DOTALL).findall(conteudo)
+	print section
+	for part in section:
+		name = re.compile('<span class="bold">(.+?)</span>(.+?)\s+</a>', re.DOTALL).findall(part)
+		if not name: name = re.compile('<span class="bold">(.+?)</span>(.+?)</a>', re.DOTALL).findall(part)
+		url = re.compile('href="(.+?)"', re.DOTALL).findall(part)
+		img = re.compile('<img src="(.+?)"', re.DOTALL).findall(part)
+		size = re.compile('<li><span>(.+?)</span></li>', re.DOTALL).findall(part)
+		tituloficheiro = name[0][0]
+		extensao = name[0][1]
+		urlficheiro = url[0]
+		if not img: thumb = GetThumbExt(extensao)
+		else: thumb = img[0]
+		tamanhoficheiro = size[0]
+		tamanhoficheiro=tamanhoficheiro.replace(' ','')
+		tamanhoparavariavel=' (' + tamanhoficheiro + ')'
+		reslist = SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,4,thumb,reslist)
+	return reslist
+
+def SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,modo,thumb,reslist):
 	listresults = []
 	listresults.append(color)
 	listresults.append(tituloficheiro)
@@ -331,7 +322,6 @@ def SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavaria
 	listresults.append(urlficheiro)
 	listresults.append(modo)
 	listresults.append(thumb)
-	listresults.append(past)
 	if 'GB' in tamanhoficheiro: tamanhoficheiro = str(float(tamanhoficheiro.replace('GB','').replace(',','.'))*1024).replace('.',',')+'MB'
 	if 'KB' in tamanhoficheiro: tamanhoficheiro = str(float(tamanhoficheiro.replace('KB','').replace(',','.'))/1024).replace('.',',')+'MB'
 	tamanhoficheiro = round(float(tamanhoficheiro.replace('GB','').replace('MB','').replace('KB','').replace(',','.')),2)
@@ -350,9 +340,7 @@ def SearchResultsFora(tamanhoficheiro,label,url,reslist):
 
 def getKey(item):
 	return item[0]
-#Mafarricos,en - Ordenação da pesquisa por tamanho de ficheiro
 
-#Mafarricos,sn - Pesquisa de outros addons	
 def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
 	login(True)
 	source = xbmcgui.Dialog().select
@@ -372,7 +360,7 @@ def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
 			except: ftype='All'
 			pagina=1
 			token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
-			form_d = {'IsGallery':'True','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
+			form_d = {'IsGallery':'False','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
 			from t0mm0.common.addon import Addon
 			addon=Addon(addon_id)
 			addon.save_data('temp.txt',form_d)
@@ -472,30 +460,6 @@ def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
 			urllist.append(part2[1])		
 	choose=source('Link a Abrir',selectlist)
 	if choose > -1:	analyzer(urllist[choose])
-#Mafarricos,en - Pesquisa de outros addons
-
-def obterlistadeficheiros():
-            string=[]
-            nrdepaginas=71
-            for i in xrange(1,int(nrdepaginas)+1):
-                  url='http://abelhas.pt/qqcoisa,%s' % i
-                  extra='?requestedFolderMode=filesList&fileListSortType=Name&fileListAscending=True'
-                  conteudo=clean(abrir_url_cookie(url + extra))
-                  items1=re.compile('<li class="fileItemContainer">\s+<p class="filename">\s+<a class="downloadAction" href=".+?">    <span class="bold">.+?</span>(.+?)</a>\s+</p>\s+<div class="thumbnail">\s+<div class="thumbnailWrapper expType" rel="Image" style=".+?">\s+<a href="(.+?)" class="thumbImg" rel="highslide" style=".+?" title="(.+?)">\s+<img src=".+?" rel=".+?" alt=".+?" style=".+?"/>\s+</a>\s+</div>\s+</div>\s+<div class="smallTab">\s+<ul>\s+<li>\s+(.+?)</li>\s+<li><span class="date">(.+?)</span></li>').findall(conteudo)         
-                  for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items1:
-                        string.append(tituloficheiro)
-                  #contributo mafarricos com alteracoes, ty
-                  items2=re.compile('<a class="downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
-                  for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2:
-                        string.append(tituloficheiro)
-                  if not items1:
-                        if not items2:
-                              conteudo=clean(conteudo)
-                              #isto ta feio
-                              items3=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
-                              for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3:
-                                    string.append(tituloficheiro)
-            print string
 
 def criarplaylist(url,name):
 	playlist = xbmc.PlayList(1)
@@ -506,6 +470,63 @@ def criarplaylist(url,name):
 	xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
 	xbmcPlayer.play(playlist)
 	MainPlaylist = []
+	
+def trailer(name):
+	youtube_trailer_search = 'https://www.googleapis.com/youtube/v3/search?part=id,snippet&q=%s-Trailer&maxResults=1&key=AIzaSyCgpWUrGw2mySqmxxzlrsUoNhpGCBVJD7s'
+	cleanname=re.compile('COLOR .+?\](.+?)\[/COLOR').findall(name)
+	if cleanname: name = cleanname[0][:-4]
+	ytpage = abrir_url(youtube_trailer_search % (urllib.quote_plus(name)))
+	youtubeid = re.compile('"videoId": "(.+?)"').findall(ytpage)
+	url = 'plugin://plugin.video.youtube/play/?video_id=%s' % youtubeid[0]
+	if url == None: return
+	item = xbmcgui.ListItem(path=url)
+	item.setProperty("IsPlayable", "true")
+	xbmc.Player().play(url, item)
+
+def ReturnStatus(site):
+	if selfAddon.getSetting(site+'-enable') == 'true' and selfAddon.getSetting(site+'-check') == 'true': return True
+	return False
+
+def appendValues():
+	username = []
+	password = []
+	site = []
+	label = []
+	color = []
+	if ReturnStatus('abelhas'):
+		username.append(username_ab)
+		password.append(selfAddon.getSetting('abelhas-password'))
+		site.append(MainURL)
+		label.append('Abelhas')
+		color.append('gold')
+	if ReturnStatus('minhateca'):
+		username.append(username_mt)
+		password.append(selfAddon.getSetting('minhateca-password'))
+		site.append(MinhaMainURL)
+		label.append('Minhateca')
+		color.append('blue')
+	return username,password,site,label,color
+#Mafarricos,en - Fim de Novas alterações
+
+def obterlistadeficheiros():
+            string=[]
+            nrdepaginas=71
+            for i in xrange(1,int(nrdepaginas)+1):
+                  url='http://abelhas.pt/qqcoisa,%s' % i
+                  extra='?requestedFolderMode=filesList&fileListSortType=Name&fileListAscending=True'
+                  conteudo=clean(abrir_url_cookie(url + extra))
+                  items1=re.compile('<li class="fileItemContainer">\s+<p class="filename">\s+<a class="downloadAction" href=".+?">    <span class="bold">.+?</span>(.+?)</a>\s+</p>\s+<div class="thumbnail">\s+<div class="thumbnailWrapper expType" rel="Image" style=".+?">\s+<a href="(.+?)" class="thumbImg" rel="highslide" style=".+?" title="(.+?)">\s+<img src=".+?" rel=".+?" alt=".+?" style=".+?"/>\s+</a>\s+</div>\s+</div>\s+<div class="smallTab">\s+<ul>\s+<li>\s+(.+?)</li>\s+<li><span class="date">(.+?)</span></li>').findall(conteudo)         
+                  for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items1: string.append(tituloficheiro)
+                  #contributo mafarricos com alteracoes, ty
+                  items2=re.compile('<a class="downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
+                  for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2: string.append(tituloficheiro)
+                  if not items1:
+                        if not items2:
+                              conteudo=clean(conteudo)
+                              #isto ta feio
+                              items3=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
+                              for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3: string.append(tituloficheiro)
+            print string
 
 def pastas_ref(url):
       pastas(url,name)
@@ -540,7 +561,6 @@ def paginas(link):
       except: pass
 
 ########################################################### PLAYER ################################################
-
 def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
       if re.search('minhateca.com.br',url):
             sitebase=MinhaMainURL
@@ -616,11 +636,6 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
             if playlistTitle <> '': comecarvideo(playlistTitle,linkfinal,playterm=playterm)
             else: comecarvideo(name,linkfinal,playterm=playterm)
 
-def legendas(moviefileid,url):
-      url=url.replace(','+moviefileid,'').replace('.mkv','.srt').replace('.mp4','.srt').replace('.avi','.srt').replace('.wmv','.srt')[:-7]
-      legendas=analyzer(url,subtitles='sim')
-      return legendas
-
 def comecarvideo(name,url,playterm,legendas=None):
         if re.search('minhateca.com.br',url): sitename='Minhateca - '+name
         else: sitename='Abelhas - '+name
@@ -670,8 +685,12 @@ def comecarplaylist():
               xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
               xbmcPlayer.play(playlist)
 
-################################################## PASTAS ################################################################
+def legendas(moviefileid,url):
+      url=url.replace(','+moviefileid,'').replace('.mkv','.srt').replace('.mp4','.srt').replace('.avi','.srt').replace('.wmv','.srt')[:-7]
+      legendas=analyzer(url,subtitles='sim')
+      return legendas
 
+################################################## PASTAS ################################################################
 def addLink(name,url,iconimage):
       liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
       liz.setInfo( type="Video", infoLabels={ "Title": name } )
@@ -682,7 +701,6 @@ def addDir(name,url,mode,iconimage,total,pasta,atalhos=False):
       contexto=[]
       u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
       liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
-      #contexto.append((traducao(40050), 'XBMC.RunPlugin(%s?mode=15&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
       if atalhos==False:contexto.append(('Adicionar atalho', 'RunPlugin(%s?mode=20&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
@@ -749,11 +767,9 @@ def dialogdown(numblocks, blocksize, filesize, dp, start_time):
             kbps_speed = kbps_speed / 1024 
             total = float(filesize) / (1024 * 1024) 
             mbs = '%.02f MB de %.02f MB' % (currently_downloaded, total) 
-            #e = 'Velocidade: (%.0f Kb/s) ' % kbps_speed
             e = ' (%.0f Kb/s) ' % kbps_speed 
             tempo = traducao(40045) + ': %02d:%02d' % divmod(eta, 60) 
             dp.update(percent, mbs + e,tempo)
-            #if percent=xbmc.executebuiltin("XBMC.Notification(Abelhas.pt,"+ mbs + e + ",'500000',"+iconpequeno+")")
       except: 
             percent = 100 
             dp.update(percent) 
@@ -766,7 +782,6 @@ class StopDownloading(Exception):
       def __str__(self): return repr(self.value)
 
 ######################################################## OUTRAS FUNCOES ###############################################
-
 def caixadetexto(url,ftype=''):
       global MainPlayList
       MainPlayList = []
@@ -797,8 +812,6 @@ def caixadetexto(url,ftype=''):
 				if ReturnStatus('minhateca'):
 					form_d = {'FileName':encode,'submitSearchFiles':'Buscar','FileType':ftype,'IsGallery':'False'}
 					pastas(MinhaMainURL + 'action/SearchFiles',name,formcont=form_d,past=True)
-				print '###aki global %s' % MainPlayList
-				
       else: sys.exit(0)
             
 def abrir_url(url):
@@ -828,7 +841,6 @@ def openfile(filename,pastafinal=pastaperfil):
         print "Nao abriu os temporarios de: %s" % filename
         return None
 
-
 def abrir_url_cookie(url,erro=True):
       net.set_cookies(cookies)
       try:
@@ -842,15 +854,6 @@ def abrir_url_cookie(url,erro=True):
       except urllib2.URLError, e:
             if erro==True: mensagemok('Abelhas.pt',traducao(40032)+traducao(40033))
             sys.exit(0)
-
-def versao_disponivel():
-      try:
-            link=abrir_url('http://fightnight-xbmc.googlecode.com/svn/addons/fightnight/plugin.video.abelhas/addon.xml')
-            match=re.compile('name="Abelhas.pt"\r\n       version="(.+?)"\r\n       provider-name="fightnight">').findall(link)[0]
-      except:
-            ok = mensagemok('Abelhas.pt',traducao(40034),traducao(40035),'')
-            match=traducao(40036)
-      return match
 
 def redirect(url):
       req = urllib2.Request(url)
@@ -879,44 +882,6 @@ def clean(text):
       regex = re.compile("|".join(map(re.escape, command.keys())))
       return regex.sub(lambda mo: command[mo.group(0)], text)
 
-#Mafarricos - novas funções,sn
-def trailer(name):
-	youtube_trailer_search = 'https://www.googleapis.com/youtube/v3/search?part=id,snippet&q=%s-Trailer&maxResults=1&key=AIzaSyCgpWUrGw2mySqmxxzlrsUoNhpGCBVJD7s'
-	cleanname=re.compile('COLOR .+?\](.+?)\[/COLOR').findall(name)
-	if cleanname: name = cleanname[0][:-4]
-	ytpage = abrir_url(youtube_trailer_search % (urllib.quote_plus(name)))
-	youtubeid = re.compile('"videoId": "(.+?)"').findall(ytpage)
-	url = 'plugin://plugin.video.youtube/play/?video_id=%s' % youtubeid[0]
-	if url == None: return
-	item = xbmcgui.ListItem(path=url)
-	item.setProperty("IsPlayable", "true")
-	xbmc.Player().play(url, item)
-
-def ReturnStatus(site):
-	if selfAddon.getSetting(site+'-enable') == 'true' and selfAddon.getSetting(site+'-check') == 'true': return True
-	return False
-
-def appendValues():
-	username = []
-	password = []
-	site = []
-	label = []
-	color = []
-	if ReturnStatus('abelhas'):
-		username.append(username_ab)
-		password.append(selfAddon.getSetting('abelhas-password'))
-		site.append(MainURL)
-		label.append('Abelhas')
-		color.append('gold')
-	if ReturnStatus('minhateca'):
-		username.append(username_mt)
-		password.append(selfAddon.getSetting('minhateca-password'))
-		site.append(MinhaMainURL)
-		label.append('Minhateca')
-		color.append('blue')
-	return username,password,site,label,color
-#Mafarricos - novas funções,en
-
 def traducao(texto):
       return traducaoma(texto).encode('utf-8')
 
@@ -941,7 +906,6 @@ print "Name: "+str(name)
 print "Name: "+str(tamanhoparavariavel)
 
 if mode==None or url==None or len(url)<1:
-	print "Versao Instalada: v" + versao
 	if selfAddon.getSetting('abelhas-enable') == 'false' and selfAddon.getSetting('minhateca-enable') == 'false':
 		ok = mensagemok('Abelhas.pt / Minhateca','Precisa de configurar a(s) conta(s)','para aceder aos conteudos.')
 		entrarnovamente(1)
@@ -955,7 +919,7 @@ elif mode==4: analyzer(url)
 elif mode==5: caixadetexto(url)
 elif mode==6: login()
 elif mode==7: pesquisa()
-elif mode==8: selfAddon.openSettings()#sacarficheiros()
+elif mode==8: selfAddon.openSettings()
 elif mode==9: favoritos()
 elif mode==10: analyzer(url,subtitles='',playterm='playlist')
 elif mode==11: analyzer(url,subtitles='',playterm='download')

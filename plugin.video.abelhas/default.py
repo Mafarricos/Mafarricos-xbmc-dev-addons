@@ -66,7 +66,7 @@ def menu_principal(ligacao):
       if ligacao==1:
             addDir('[B][COLOR red]Addon em actualização/manutenção! Possíveis bugs.[/COLOR][/B]',MainURL,1,wtpath + art + 'pasta.png',1,True)
             addDir(traducao(40007),MainURL,1,wtpath + art + 'pasta.png',1,True)
-            addDir('Mais Recentes',MinhaMainURL,2,wtpath + art + 'pasta.png',2,True)
+            addDir('Mais Recentes',MainURL,2,wtpath + art + 'pasta.png',2,True)
             if ReturnStatus('abelhas'): 
 				addDir('A Minha Abelha',MainURL + username_ab,3,wtpath + art + 'pasta.png',2,True)
 				addDir('Ir para uma Abelha','pastas',5,wtpath + art + 'pasta.png',2,True)
@@ -294,13 +294,13 @@ def GetThumbExt(extensao):
 def ReturnConteudo(conteudo,past,color):
 	diffItems = False
 	reslist = []
-	section = re.compile('<div class="filerow fileItemContainer">(.+?)</ul></div>    </div>', re.DOTALL).findall(conteudo)
+	section = re.compile('<div class="filerow fileItemContainer">(.+?)</ul></div>\s+</div>', re.DOTALL).findall(conteudo)
 	if not section: section = re.compile('<div class="filerow fileItemContainer">(.+?)</div></div>', re.DOTALL).findall(conteudo)
 	print section
 	for part in section:
 		name = re.compile('<span class="bold">(.+?)</span>(.+?)\s+</a>', re.DOTALL).findall(part)
 		if not name: name = re.compile('<span class="bold">(.+?)</span>(.+?)</a>', re.DOTALL).findall(part)
-		url = re.compile('href="(.+?)"', re.DOTALL).findall(part)
+		url = re.compile('href="/(.+?)"', re.DOTALL).findall(part)
 		img = re.compile('<img src="(.+?)"', re.DOTALL).findall(part)
 		size = re.compile('<li><span>(.+?)</span></li>', re.DOTALL).findall(part)
 		tituloficheiro = name[0][0]

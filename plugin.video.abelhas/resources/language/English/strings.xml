@@ -53,11 +53,13 @@
 	<string id="40048">Deleted the Playlist</string>
 	<string id="40049">Creating Playlist</string>
 	<string id="40050">Create Playlist</string>
+	<string id="40051">Add to Library</string>
 	<string id="30140">Subtitles</string>
 	<string id="30141">Subtitles could be unavailable or out of sync.</string>
 	<string id="30142">In that case use your own subtitles.</string>
 	<string id="30143">Enable subtitles</string>
 	<string id="30144">Primary Language</string>
 	<string id="30145">Secondary Language</string>
-	<string id="30146">Minimum file duration to search subtitles (in Minutes)</string>	
+	<string id="30146">Minimum file duration to search subtitles (in Minutes)</string>
+	<string id="30147">Library Integration Folder</string>
 </strings>

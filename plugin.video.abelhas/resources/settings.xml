@@ -14,6 +14,7 @@
       <setting type="sep"/>
       <setting id="aviso-extensao" type="bool" label="30000" default="true"/>
       <setting id="ultima-pesquisa" type="text" label="Ultima pesquisa" default="" visible="false"/>
+	  <setting id="libraryfolder" type="folder" label="30147" default="special://userdata/addon_data/plugin.video.abelhas/Movies"/>
    </category>
 	<category label="30140">
 		<setting id="subtitles" type="bool" label="30143" default="false"/>

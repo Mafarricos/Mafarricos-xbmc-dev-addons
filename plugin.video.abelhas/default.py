@@ -3,7 +3,7 @@
 """ abelhas.pt
     2015 fightnight"""
 
-import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time
+import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time,xbmcvfs
 from t0mm0.common.net import Net
 net=Net()
 
@@ -24,6 +24,7 @@ pastaperfil = xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-
 cookies = os.path.join(pastaperfil, "cookies.lwp")
 username_ab = urllib.quote(selfAddon.getSetting('abelhas-username'))
 username_mt = urllib.quote(selfAddon.getSetting('minhateca-username'))
+moviesFolder = xbmc.translatePath(selfAddon.getSetting('libraryfolder'))
 MainPlayList = []
 
 #################################################### LOGIN ABELHAS #####################################################
@@ -562,6 +563,7 @@ def paginas(link):
 
 ########################################################### PLAYER ################################################
 def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
+      print 'UUUUUUUUURRRRRRRRRRLLLLLLLL %s' % url
       if re.search('minhateca.com.br',url):
             sitebase=MinhaMainURL
             host='minhateca.com.br'
@@ -690,6 +692,26 @@ def legendas(moviefileid,url):
       legendas=analyzer(url,subtitles='sim')
       return legendas
 
+def add_to_library(name,url,updatelibrary=True):
+	if not xbmcvfs.exists(moviesFolder): xbmcvfs.mkdir(moviesFolder)
+	name2 = re.compile('\[B\]\[COLOR .+?\](.+?)\[/COLOR\]\[/B\]').findall(name)
+	print name,name2,'merda'
+	if name2: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name2[0][:-4])
+	else: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name[:-4])
+	print 'xit %s' % cleaned_title
+	movie_folder = os.path.join(moviesFolder,cleaned_title)
+	if not xbmcvfs.exists(movie_folder): xbmcvfs.mkdir(movie_folder)
+	strm_contents = 'plugin://plugin.video.abelhas/?url=' + url +'&mode=25&name=' + urllib.quote_plus(cleaned_title)
+	savefile(urllib.quote_plus(cleaned_title)+'.strm',strm_contents,movie_folder)
+	if updatelibrary:
+		#xbmc.executebuiltin("XBMC.Notification(Abelhas,Filme adicionado à biblioteca!,'10000',"+wtpath+"/icon.png)")
+		xbmc.executebuiltin("XBMC.UpdateLibrary(video,"+movie_folder+")")
+	else: return
+
+def play_from_outside(name,url):
+		login()
+		analyzer(url)
+
 ################################################## PASTAS ################################################################
 def addLink(name,url,iconimage):
       liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
@@ -711,21 +733,22 @@ def addDir(name,url,mode,iconimage,total,pasta,atalhos=False):
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 
 def addCont(name,url,mode,tamanho,iconimage,total,pasta=False,atalhos=False):
-      contexto=[]
-      u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&tamanhof="+urllib.quote_plus(tamanho)
-      liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
-      contexto.append((traducao(40038), 'XBMC.RunPlugin(%s?mode=10&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
-      contexto.append((traducao(40050), 'XBMC.RunPlugin(%s?mode=15&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))	  
-      contexto.append((traducao(40046), 'XBMC.RunPlugin(%s?mode=13&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
-      contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
-      contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
-      if atalhos==False: contexto.append(('Adicionar atalho', 'RunPlugin(%s?mode=19&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
-      else: contexto.append(('Remover atalho', 'RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),atalhos)))
-      contexto.append((traducao(40040), 'XBMC.RunPlugin(%s?mode=11&url=%s&name=%s&tamanhof=%s)' % (sys.argv[0], urllib.quote_plus(url),name,tamanho)))
-      liz.setInfo( type="Video", infoLabels={ "Title": name} )
-      liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
-      liz.addContextMenuItems(contexto, replaceItems=True) 
-      return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
+	contexto=[]
+	u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&tamanhof="+urllib.quote_plus(tamanho)
+	liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
+	contexto.append((traducao(40038), 'XBMC.RunPlugin(%s?mode=10&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+	contexto.append((traducao(40050), 'XBMC.RunPlugin(%s?mode=15&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))	  
+	contexto.append((traducao(40046), 'XBMC.RunPlugin(%s?mode=13&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+	contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+	contexto.append((traducao(40051), 'XBMC.RunPlugin(%s?mode=26&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+	contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
+	if atalhos==False: contexto.append(('Adicionar atalho', 'RunPlugin(%s?mode=19&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
+	else: contexto.append(('Remover atalho', 'RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),atalhos)))
+	contexto.append((traducao(40040), 'XBMC.RunPlugin(%s?mode=11&url=%s&name=%s&tamanhof=%s)' % (sys.argv[0], urllib.quote_plus(url),name,tamanho)))
+	liz.setInfo( type="Video", infoLabels={ "Title": name} )
+	liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
+	liz.addContextMenuItems(contexto, replaceItems=True) 
+	return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
            
 ######################################################## DOWNLOAD ###############################################
 ### THANKS ELDORADO (ICEFILMS) ###
@@ -936,4 +959,6 @@ elif mode==21: atalhos(type='remove')
 elif mode==22: pastas('/'.join(url.split('/')[:-1]),name)
 elif mode==23: pastas_de_fora(url,name)
 elif mode==24: proxpesquisa_mt()
+elif mode==25: play_from_outside(name,url)
+elif mode==26: add_to_library(name,url)
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

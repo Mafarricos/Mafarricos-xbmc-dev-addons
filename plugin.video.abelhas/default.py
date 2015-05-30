@@ -33,6 +33,7 @@ def login(defora=False):
 	username,password,site,label,color = appendValues()
 	for x in range(0, len(username)):
 		try:
+			print username[x]
 			link=abrir_url(site[x])
 			token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(link)[0]
 			form_d = {'RedirectUrl':'','Redirect':'True','FileId':0,'Login':username[x],'Password':password[x],'RememberMe':'true','__RequestVerificationToken':token}
@@ -425,7 +426,6 @@ def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
 				else:displock=''
 				addDir(nomepasta + displock,MainURL + urlpasta,3,wtpath + art + 'pasta.png',len(seleccionados),True)
 		except: pass
-		#contributo mafarricos com alteracoes, ty
 		reslist = []
 		items1=re.compile('<li class="fileItemContainer">\s+<p class="filename">\s+<a class="downloadAction" href=".+?">    <span class="bold">.+?</span>(.+?)</a>\s+</p>\s+<div class="thumbnail">\s+<div class="thumbnailWrapper expType" rel="Image" style=".+?">\s+<a href="(.+?)" class="thumbImg" rel="highslide" style=".+?" title="(.+?)">\s+<img src=".+?" rel=".+?" alt=".+?" style=".+?"/>\s+</a>\s+</div>\s+</div>\s+<div class="smallTab">\s+<ul>\s+<li>\s+(.+?)</li>\s+<li><span class="date">(.+?)</span></li>').findall(conteudo)         
 		for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items1:
@@ -445,7 +445,6 @@ def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
 		if not items1:
 			if not items2:
 				conteudo=clean(conteudo)
-				#isto ta feio
 				items3=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
 				for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3:
 					tamanhoficheiro=tamanhoficheiro.replace(' ','')
@@ -518,13 +517,11 @@ def obterlistadeficheiros():
                   conteudo=clean(abrir_url_cookie(url + extra))
                   items1=re.compile('<li class="fileItemContainer">\s+<p class="filename">\s+<a class="downloadAction" href=".+?">    <span class="bold">.+?</span>(.+?)</a>\s+</p>\s+<div class="thumbnail">\s+<div class="thumbnailWrapper expType" rel="Image" style=".+?">\s+<a href="(.+?)" class="thumbImg" rel="highslide" style=".+?" title="(.+?)">\s+<img src=".+?" rel=".+?" alt=".+?" style=".+?"/>\s+</a>\s+</div>\s+</div>\s+<div class="smallTab">\s+<ul>\s+<li>\s+(.+?)</li>\s+<li><span class="date">(.+?)</span></li>').findall(conteudo)         
                   for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items1: string.append(tituloficheiro)
-                  #contributo mafarricos com alteracoes, ty
                   items2=re.compile('<a class="downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
                   for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2: string.append(tituloficheiro)
                   if not items1:
                         if not items2:
                               conteudo=clean(conteudo)
-                              #isto ta feio
                               items3=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
                               for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3: string.append(tituloficheiro)
             print string
@@ -563,7 +560,6 @@ def paginas(link):
 
 ########################################################### PLAYER ################################################
 def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
-      print 'UUUUUUUUURRRRRRRRRRLLLLLLLL %s' % url
       if re.search('minhateca.com.br',url):
             sitebase=MinhaMainURL
             host='minhateca.com.br'
@@ -615,6 +611,7 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
             else: return
       if playlistTitle == '': mensagemprogresso.close()
       linkfinal=linkfinal.replace('\u0026','&').replace('\u003c','<').replace('\u003e','>').replace('\\','')
+      print linkfinal
       if re.search('.jpg',url) or re.search('.png',url) or re.search('.gif',url) or re.search('.bmp',url):
             if re.search('.jpg',url): extfic='temp.jpg'
             elif re.search('.png',url): extfic='temp.png'
@@ -639,42 +636,43 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
             else: comecarvideo(name,linkfinal,playterm=playterm)
 
 def comecarvideo(name,url,playterm,legendas=None):
-        if re.search('minhateca.com.br',url): sitename='Minhateca - '+name
-        else: sitename='Abelhas - '+name
-        playeractivo = xbmc.getCondVisibility('Player.HasMedia')
-        if playterm=='download':
-              fazerdownload(name,url)
-              return
-        thumbnail=''
-        playlist = xbmc.PlayList(1)
-        if not playterm and playeractivo==0: playlist.clear()
-        listitem = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumbnail)
-        title='%s' % (name.split('[/B]')[0].replace('[B]',''))
-        listitem.setInfo("Video", {"Title":title})
-        listitem.setInfo("Music", {"Title":title})
-        listitem.setProperty('mimetype', 'video/x-msvideo')
-        listitem.setProperty('IsPlayable', 'true')
-        if playterm <> 'playlist':
-              dialogWait = xbmcgui.DialogProgress()
-              dialogWait.create('Video', 'A carregar')
-        playlist.add(url, listitem)
-        if playterm <> 'playlist':		
-              dialogWait.close()
-              del dialogWait
-        xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
-        if not playterm and playeractivo==0: xbmcPlayer.play(playlist)
-        if legendas!=None: xbmcPlayer.setSubtitles(legendas)
-        else:
-			if selfAddon.getSetting("subtitles") == 'true': 
-				try: totalTime = xbmc.Player().getTotalTime()
-				except: totalTime = 0
-				print '##totaltime',totalTime
-				if totalTime >= int(selfAddon.getSetting("minsize"))*60:
-					print '#pesquisar legendas'
-					from resources.lib import subtitles
-					legendas = subtitles.getsubtitles(name,selfAddon.getSetting("sublang1"),selfAddon.getSetting("sublang2"))
-					if legendas!=None: xbmcPlayer.setSubtitles(legendas)
-        if playterm=='playlist': xbmc.executebuiltin("XBMC.Notification("+sitename+","+traducao(40039)+",'500000',"+iconpequeno.encode('utf-8')+")")
+	if re.search('minhateca.com.br',url): sitename='Minhateca - '+name
+	else: sitename='Abelhas - '+name
+	playeractivo = xbmc.getCondVisibility('Player.HasMedia')
+	if playterm=='download':
+		  fazerdownload(name,url)
+		  return
+	thumbnail=''
+	playlist = xbmc.PlayList(1)
+	if not playterm and playeractivo==0: playlist.clear()
+	listitem = xbmcgui.ListItem(path=url)
+	title='%s' % (name.split('[/B]')[0].replace('[B]',''))
+	listitem.setInfo("Video", {"Title":title})
+	listitem.setInfo("Music", {"Title":title})
+	listitem.setProperty('mimetype', 'video/x-msvideo')
+	listitem.setProperty('IsPlayable', 'true')
+	xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
+	if playterm <> 'playlist':
+		  dialogWait = xbmcgui.DialogProgress()
+		  dialogWait.create('Video', 'A carregar')
+	playlist.add(url, listitem)
+	if playterm <> 'playlist':		
+		  dialogWait.close()
+		  del dialogWait
+	xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+	if not playterm and playeractivo==0: xbmcPlayer.play(playlist)
+	if legendas!=None: xbmcPlayer.setSubtitles(legendas)
+	else:
+		if selfAddon.getSetting("subtitles") == 'true': 
+			try: totalTime = xbmc.Player().getTotalTime()
+			except: totalTime = 0
+			print '##totaltime',totalTime
+			if totalTime >= int(selfAddon.getSetting("minsize"))*60:
+				print '#pesquisar legendas'
+				from resources.lib import subtitles
+				legendas = subtitles.getsubtitles(name,selfAddon.getSetting("sublang1"),selfAddon.getSetting("sublang2"))
+				if legendas!=None: xbmcPlayer.setSubtitles(legendas)
+	if playterm=='playlist': xbmc.executebuiltin("XBMC.Notification("+sitename+","+traducao(40039)+",'500000',"+iconpequeno.encode('utf-8')+")")
 
 def limparplaylist():
         playlist = xbmc.PlayList(1)
@@ -703,14 +701,12 @@ def add_to_library(name,url,updatelibrary=True):
 	if not xbmcvfs.exists(movie_folder): xbmcvfs.mkdir(movie_folder)
 	strm_contents = 'plugin://plugin.video.abelhas/?url=' + url +'&mode=25&name=' + urllib.quote_plus(cleaned_title)
 	savefile(urllib.quote_plus(cleaned_title)+'.strm',strm_contents,movie_folder)
-	if updatelibrary:
-		#xbmc.executebuiltin("XBMC.Notification(Abelhas,Filme adicionado à biblioteca!,'10000',"+wtpath+"/icon.png)")
-		xbmc.executebuiltin("XBMC.UpdateLibrary(video,"+movie_folder+")")
+	if updatelibrary: xbmc.executebuiltin("XBMC.UpdateLibrary(video,"+movie_folder+")")
 	else: return
 
 def play_from_outside(name,url):
-		login()
-		analyzer(url)
+	login(True)
+	analyzer(url.replace(' ','+'))
 
 ################################################## PASTAS ################################################################
 def addLink(name,url,iconimage):

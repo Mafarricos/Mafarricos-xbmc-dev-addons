@@ -246,7 +246,7 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 		except: pass          
 	else:
 		if conteudo=='':
-			  extra='?IsGallery=False&requestedFolderMode=filesList&fileListSortType=Size&fileListAscending=False'
+			  extra=returnExtra()
 			  conteudo=clean(abrir_url_cookie(url + extra))
 	if re.search('ProtectedFolderChomikLogin',conteudo):
 		chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
@@ -300,7 +300,7 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 		reslist = []
 		reslist = ReturnConteudo(conteudo,past,color)
 		if reslist:
-			reslist = sorted(reslist, key=getKey,reverse=True)
+			if re.search('action/SearchFiles',url) and selfAddon.getSetting('search-order') == 'true': reslist = sorted(reslist, key=getKey,reverse=True)
 			global MainPlaylist
 			for part1,part2 in reslist: 
 				MainPlayList.append([part2[1],sitebase + part2[4]])
@@ -310,6 +310,19 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 	xbmc.executebuiltin("Container.SetViewMode(51)")
 
 #Mafarricos,sn - Novas alterações
+def returnExtra():
+	fileListSortType = 'Name'
+	fileListAscending = 'True'
+	option1 = int(selfAddon.getSetting('filesorder'))
+	option2 = int(selfAddon.getSetting('fileasc'))
+	if option1 == 0: fileListSortType = 'Name'
+	elif option1 == 1: fileListSortType = 'Type'
+	elif option1 == 2: fileListSortType = 'Size'
+	elif option1 == 3: fileListSortType = 'Date'
+	if option2 == 0: fileListAscending = 'True'
+	elif option2 == 1: fileListAscending = 'False'
+	return '?IsGallery=False&requestedFolderMode=filesList&fileListSortType='+fileListSortType+'&fileListAscending='+fileListAscending
+
 def GetThumbExt(extensao):
 	extensao=extensao.replace(' ','').lower()
 	if extensao=='.rar' or extensao == '.zip' or extensao=='.7z': return wtpath + art + 'rar.png'
@@ -397,7 +410,7 @@ def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
 		except: pass
 	else:
 		if conteudo=='':
-			extra='?requestedFolderMode=filesList&fileListSortType=Name&fileListAscending=True'
+			extra=returnExtra()
 			conteudo=clean(abrir_url_cookie(url + extra))
 	if re.search('ProtectedFolderChomikLogin',conteudo):
 		chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
@@ -596,7 +609,6 @@ def pastas_ref(url):
 
 def paginas(link):
 	sitebase,nextname,color,mode = returnValues(link)
-	print link
 	try:
 		idmode=3
 		try: conteudo=re.compile('<div id="listView".+?>(.+?)<div class="filerow fileItemContainer">').findall(link)[0]

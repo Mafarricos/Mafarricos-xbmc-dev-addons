@@ -11,6 +11,8 @@ net=Net()
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
 MinhaMainURL = 'http://minhateca.com.br/'
+lolaMainURL = 'http://lolabits.es/'
+toutMainURL = 'http://toutbox.fr/'
 art = '/resources/art/'
 user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'
 selfAddon = xbmcaddon.Addon(id=addon_id)
@@ -24,6 +26,8 @@ pastaperfil = xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-
 cookies = os.path.join(pastaperfil, "cookies.lwp")
 username_ab = urllib.quote(selfAddon.getSetting('abelhas-username'))
 username_mt = urllib.quote(selfAddon.getSetting('minhateca-username'))
+username_lb = urllib.quote(selfAddon.getSetting('lolabits-username'))
+username_tb = urllib.quote(selfAddon.getSetting('toutbox-username'))
 moviesFolder = xbmc.translatePath(selfAddon.getSetting('libraryfolder'))
 MainPlayList = []
 
@@ -62,23 +66,29 @@ def login(defora=False):
 
 ################################################### MENUS PLUGIN ######################################################
 def menu_principal(ligacao):
-      global MainPlayList
-      MainPlaylist = []
-      if ligacao==1:
-            addDir('[B][COLOR red]Addon em actualização/manutenção! Possíveis bugs.[/COLOR][/B]',MainURL,1,wtpath + art + 'pasta.png',1,True)
-            addDir(traducao(40007),MainURL,1,wtpath + art + 'pasta.png',1,True)
-            addDir('Mais Recentes',MainURL,2,wtpath + art + 'pasta.png',2,True)
-            if ReturnStatus('abelhas'): 
-				addDir('A Minha Abelha',MainURL + username_ab,3,wtpath + art + 'pasta.png',2,True)
-				addDir('Ir para uma Abelha','pastas',5,wtpath + art + 'pasta.png',2,True)
-            if ReturnStatus('minhateca'): 
-				addDir('A Minha Minhateca',MinhaMainURL + username_mt,3,wtpath + art + 'pasta.png',2,True)
-				addDir('Ir para uma Minhateca','pastas',5,wtpath + art + 'pasta.png',2,True)
-            addDir(traducao(40037),MainURL,9,wtpath + art + 'pasta.png',2,True)
-            addDir('Atalhos',MainURL,18,wtpath + art + 'pasta.png',2,True)
-            addDir(traducao(40011),'pesquisa',7,wtpath + art + 'pasta.png',3,True)
-      elif ligacao==0: addDir(traducao(40015),MainURL,6,wtpath + art + 'pasta.png',1,True)
-      xbmc.executebuiltin("Container.SetViewMode(51)")
+	global MainPlayList
+	MainPlaylist = []
+	if ligacao==1:
+		addDir('[B][COLOR red]Addon em actualização/manutenção! Possíveis bugs.[/COLOR][/B]',MainURL,1,wtpath + art + 'pasta.png',1,True)
+		addDir(traducao(40007),MainURL,1,wtpath + art + 'pasta.png',1,True)
+		addDir('Mais Recentes',MainURL,2,wtpath + art + 'pasta.png',2,True)
+		if ReturnStatus('abelhas'): 
+			addDir('A Minha Abelha',MainURL + username_ab,3,wtpath + art + 'pasta.png',2,True)
+			addDir('Ir para uma Abelha','pastas',5,wtpath + art + 'pasta.png',2,True)
+		if ReturnStatus('minhateca'): 
+			addDir('A Minha Minhateca',MinhaMainURL + username_mt,3,wtpath + art + 'pasta.png',2,True)
+			addDir('Ir para uma Minhateca','pastas',5,wtpath + art + 'pasta.png',2,True)
+		if ReturnStatus('lolabits'): 
+			addDir('A Minha Lolabits',lolaMainURL + username_lb,3,wtpath + art + 'pasta.png',2,True)
+			addDir('Ir para uma Lolabits','pastas',5,wtpath + art + 'pasta.png',2,True)				
+		if ReturnStatus('toutbox'): 
+			addDir('A Minha Toutbox',toutMainURL + username_lb,3,wtpath + art + 'pasta.png',2,True)
+			addDir('Ir para uma Toutbox','pastas',5,wtpath + art + 'pasta.png',2,True)				
+		addDir(traducao(40037),MainURL,9,wtpath + art + 'pasta.png',2,True)
+		addDir('Atalhos',MainURL,18,wtpath + art + 'pasta.png',2,True)
+		addDir(traducao(40011),'pesquisa',7,wtpath + art + 'pasta.png',3,True)
+	elif ligacao==0: addDir(traducao(40015),MainURL,6,wtpath + art + 'pasta.png',1,True)
+	xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def entrarnovamente(opcoes):
       if opcoes==1: selfAddon.openSettings()
@@ -102,8 +112,10 @@ def abelhasmaisrecentes(url):
 	xbmcplugin.setContent(int(sys.argv[1]), 'livetv')
 
 def pesquisa():
-      if ReturnStatus('abelhas'): conteudo=clean(abrir_url_cookie('http://abelhas.pt/action/Help'))
-      elif ReturnStatus('minhateca'): conteudo=clean(abrir_url_cookie('http://minhateca.com.br/action/Help'))
+      if ReturnStatus('abelhas'): conteudo=clean(abrir_url_cookie(MainURL+'action/Help'))
+      elif ReturnStatus('minhateca'): conteudo=clean(abrir_url_cookie(MinhaMainURL+'action/Help'))
+      elif ReturnStatus('lolabits'): conteudo=clean(abrir_url_cookie(lolaMainURL+'action/Help'))
+      elif ReturnStatus('toutbox'): conteudo=clean(abrir_url_cookie(toutMainURL+'action/Help'))	  
       opcoeslabel=re.compile('<option value=".+?">(.+?)</option>').findall(conteudo)
       opcoesvalue=re.compile('<option value="(.+?)">.+?</option>').findall(conteudo)
       index = xbmcgui.Dialog().select(traducao(40022), opcoeslabel)
@@ -153,6 +165,30 @@ def proxpesquisa_mt():
     addon.save_data('temp.txt',form_d)
     pastas(MinhaMainURL + 'action/nada','coco',conteudo=conteudo)
 
+def proxpesquisa_lb():
+    from t0mm0.common.addon import Addon
+    addon=Addon(addon_id)
+    form_d=addon.load_data('temp.txt')
+    ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'lolabits.es','Origin':'http://lolabits.es','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+    form_d['Page']= form_d['Page'] + 1
+    endlogin=lolaMainURL + 'action/SearchFiles/Results'
+    net.set_cookies(cookies)
+    conteudo= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+    addon.save_data('temp.txt',form_d)
+    pastas(lolaMainURL + 'action/nada','coco',conteudo=conteudo)
+
+def proxpesquisa_tb():
+    from t0mm0.common.addon import Addon
+    addon=Addon(addon_id)
+    form_d=addon.load_data('temp.txt')
+    ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'toutbox.fr','Origin':'http://toutbox.fr','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+    form_d['Page']= form_d['Page'] + 1
+    endlogin=toutMainURL + 'action/SearchFiles/Results'
+    net.set_cookies(cookies)
+    conteudo= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+    addon.save_data('temp.txt',form_d)
+    pastas(toutMainURL + 'action/nada','coco',conteudo=conteudo)
+
 def atalhos(type=False):
       pastatracks = os.path.join(pastaperfil, "atalhos")
       if not os.path.exists(pastatracks):
@@ -191,97 +227,91 @@ def atalhos(type=False):
                   xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
-      if re.search('minhateca.com.br',url):
-            sitebase=MinhaMainURL
-            host='minhateca.com.br'
-            color='blue'
-      else:
-            sitebase=MainURL
-            host='abelhas.pt'
-            color='gold'
-      if re.search('action/SearchFiles',url):
-            ref_data = {'Host': host, 'Connection': 'keep-alive', 'Referer': 'http://'+host+'/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://'+host+'/'}
-            endlogin=sitebase + 'action/SearchFiles'
-            conteudo= net.http_POST(endlogin,form_data=formcont,headers=ref_data).content.encode('latin-1','ignore')
-            if re.search('O ficheiro n&#227;o foi encontrado',conteudo): mensagemok(host,'Sem resultados.')
-            try:
-                  filename=re.compile('<input name="FileName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-                  try:ftype=re.compile('<input name="FileType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-                  except: ftype='All'
-                  pagina=1
-                  token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
-                  form_d = {'IsGallery':'False','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
-                  from t0mm0.common.addon import Addon
-                  addon=Addon(addon_id)
-                  addon.save_data('temp.txt',form_d)
-                  ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':host,'Origin':'http://'+host,'Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
-                  endlogin=sitebase + 'action/SearchFiles/Results'
-                  conteudo= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
-            except: pass          
-      else:
-            if conteudo=='':
-                  extra='?IsGallery=False&requestedFolderMode=filesList&fileListSortType=Size&fileListAscending=False'
-                  conteudo=clean(abrir_url_cookie(url + extra))
-      if re.search('ProtectedFolderChomikLogin',conteudo):
-            chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            folderid=re.compile('<input id="FolderId" name="FolderId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            foldername=re.compile('<input id="FolderName" name="FolderName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            passwordfolder=caixadetexto('password')
-            form_d = {'ChomikId':chomikid,'FolderId':folderid,'FolderName':foldername,'Password':passwordfolder,'Remember':'true','__RequestVerificationToken':token}
-            ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':host,'Origin':'http://' + host,'Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
-            endlogin=sitebase + 'action/Files/LoginToFolder'
-            teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
-            teste=urllib.unquote(teste)
-            if re.search('IsSuccess":false',teste):
-                  mensagemok('Erro',traducao(40002))
-                  sys.exit(0)
-            else: pastas_ref(url)
-      elif re.search('/action/UserAccess/LoginToProtectedWindow',conteudo):
-            chomiktype=re.compile('<input id="ChomikType" name="ChomikType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            sex=re.compile('<input id="Sex" name="Sex" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            accname=re.compile('<input id="AccountName" name="AccountName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            isadult=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            adultfilter=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            passwordfolder=caixadetexto('password')
-            form_d = {'Password':passwordfolder,'OK':'OK','RemeberMe':'true','IsAdult':isadult,'Sex':sex,'AccountName':accname,'AdultFilter':adultfilter,'ChomikType':chomiktype,'TargetChomikId':chomikid}
-            ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':host,'Origin':'http://'+host,'Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
-            endlogin=sitebase + 'action/UserAccess/LoginToProtectedWindow'
-            teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
-            teste=urllib.unquote(teste)
-            if re.search('<span class="field-validation-error">A password introduzida est',teste): mensagemok('Abelhas.pt',traducao(40002))
-            else: pastas_ref(url)
-      else:
-            try:
-                  conta=re.compile('<div class="bigFileInfoRight">.+?<h3>(.+?)<span>(.+?)</span></h3>').findall(conteudo)[0]
-                  nomeconta=re.compile('<input id="FriendsTargetChomikName" name="FriendsTargetChomikName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-                  addLink('[COLOR blue][B]' + traducao(40023) + nomeconta + '[/B][/COLOR]: ' + conta[0] + conta[1],'',wtpath + art + 'star2.png')
-            except: pass
-            try:
-                  checker=url.split('/')[:-1]
-                  if len(checker) > 3 and not re.search('action/SearchFiles',url) and not re.search('/action/nada',url):
-                        urlbefore='/'.join(checker)
-                        addDir('[COLOR blue][B]Uma pasta atrás[/B][/COLOR]',urlbefore,3,wtpath + art + 'seta.png',1,True)
-            except: pass
-            try:
-                  pastas=re.compile('<div id="foldersList">(.+?)</table>.+?').findall(conteudo)
-                  seleccionados=re.compile('<a href="/(.+?)".+?title="(.+?)">(.+?)</a>').findall(pastas[0])
-                  for urlpasta,nomepasta,password in seleccionados:
-                        if re.search('<span class="pass">',password): displock=' (' + traducao(40024)+')'
-                        else:displock=''
-                        addDir('[B][COLOR white]' + nomepasta + '[/COLOR][/B]' + displock,sitebase + urlpasta,3,wtpath + art + 'pasta.png',len(seleccionados),True)
-            except: pass
-            reslist = []
-            reslist = ReturnConteudo(conteudo,past,color)
-            if reslist:
-				reslist = sorted(reslist, key=getKey,reverse=True)
-				global MainPlaylist
-				for part1,part2 in reslist: 
-					MainPlayList.append([part2[1],sitebase + part2[4]])
-					addCont('[B][COLOR '+part2[0]+']' + part2[1].replace(part2[2],'') + part2[2] + '[/COLOR][/B]' + '[COLOR white]' + part2[3] + '[/COLOR]',sitebase + part2[4],part2[5],part2[3],part2[6],len(reslist))
-				savefile('playlist.txt',str(MainPlayList))
-            paginas(conteudo)
-      xbmc.executebuiltin("Container.SetViewMode(51)")
+	sitebase,name,color,mode = returnValues(url)
+	host = sitebase.replace('http://','').replace('/','')	
+	if re.search('action/SearchFiles',url):
+		ref_data = {'Host': host, 'Connection': 'keep-alive', 'Referer': 'http://'+host+'/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://'+host+'/'}
+		endlogin=sitebase + 'action/SearchFiles'
+		conteudo= net.http_POST(endlogin,form_data=formcont,headers=ref_data).content.encode('latin-1','ignore')
+		if re.search('O ficheiro n&#227;o foi encontrado',conteudo): mensagemok(host,'Sem resultados.')
+		try:
+			  filename=re.compile('<input name="FileName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+			  try:ftype=re.compile('<input name="FileType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+			  except: ftype='All'
+			  pagina=1
+			  token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
+			  form_d = {'IsGallery':'False','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
+			  from t0mm0.common.addon import Addon
+			  addon=Addon(addon_id)
+			  addon.save_data('temp.txt',form_d)
+			  ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':host,'Origin':'http://'+host,'Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+			  endlogin=sitebase + 'action/SearchFiles/Results'
+			  conteudo= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+		except: pass          
+	else:
+		if conteudo=='':
+			  extra='?IsGallery=False&requestedFolderMode=filesList&fileListSortType=Size&fileListAscending=False'
+			  conteudo=clean(abrir_url_cookie(url + extra))
+	if re.search('ProtectedFolderChomikLogin',conteudo):
+		chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		folderid=re.compile('<input id="FolderId" name="FolderId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		foldername=re.compile('<input id="FolderName" name="FolderName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		passwordfolder=caixadetexto('password')
+		form_d = {'ChomikId':chomikid,'FolderId':folderid,'FolderName':foldername,'Password':passwordfolder,'Remember':'true','__RequestVerificationToken':token}
+		ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':host,'Origin':'http://' + host,'Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+		endlogin=sitebase + 'action/Files/LoginToFolder'
+		teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+		teste=urllib.unquote(teste)
+		if re.search('IsSuccess":false',teste):
+			  mensagemok('Erro',traducao(40002))
+			  sys.exit(0)
+		else: pastas_ref(url)
+	elif re.search('/action/UserAccess/LoginToProtectedWindow',conteudo):
+		chomiktype=re.compile('<input id="ChomikType" name="ChomikType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		sex=re.compile('<input id="Sex" name="Sex" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		accname=re.compile('<input id="AccountName" name="AccountName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		isadult=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		adultfilter=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		passwordfolder=caixadetexto('password')
+		form_d = {'Password':passwordfolder,'OK':'OK','RemeberMe':'true','IsAdult':isadult,'Sex':sex,'AccountName':accname,'AdultFilter':adultfilter,'ChomikType':chomiktype,'TargetChomikId':chomikid}
+		ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':host,'Origin':'http://'+host,'Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+		endlogin=sitebase + 'action/UserAccess/LoginToProtectedWindow'
+		teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+		teste=urllib.unquote(teste)
+		if re.search('<span class="field-validation-error">A password introduzida est',teste): mensagemok('Abelhas.pt',traducao(40002))
+		else: pastas_ref(url)
+	else:
+		try:
+			  conta=re.compile('<div class="bigFileInfoRight">.+?<h3>(.+?)<span>(.+?)</span></h3>').findall(conteudo)[0]
+			  nomeconta=re.compile('<input id="FriendsTargetChomikName" name="FriendsTargetChomikName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+			  addLink('[COLOR blue][B]' + traducao(40023) + nomeconta + '[/B][/COLOR]: ' + conta[0] + conta[1],'',wtpath + art + 'star2.png')
+		except: pass
+		try:
+			  checker=url.split('/')[:-1]
+			  if len(checker) > 3 and not re.search('action/SearchFiles',url) and not re.search('/action/nada',url):
+					urlbefore='/'.join(checker)
+					addDir('[COLOR blue][B]Uma pasta atrás[/B][/COLOR]',urlbefore,3,wtpath + art + 'seta.png',1,True)
+		except: pass
+		try:
+			  pastas=re.compile('<div id="foldersList">(.+?)</table>.+?').findall(conteudo)
+			  seleccionados=re.compile('<a href="/(.+?)".+?title="(.+?)">(.+?)</a>').findall(pastas[0])
+			  for urlpasta,nomepasta,password in seleccionados:
+					if re.search('<span class="pass">',password): displock=' (' + traducao(40024)+')'
+					else:displock=''
+					addDir('[B][COLOR white]' + nomepasta + '[/COLOR][/B]' + displock,sitebase + urlpasta,3,wtpath + art + 'pasta.png',len(seleccionados),True)
+		except: pass
+		reslist = []
+		reslist = ReturnConteudo(conteudo,past,color)
+		if reslist:
+			reslist = sorted(reslist, key=getKey,reverse=True)
+			global MainPlaylist
+			for part1,part2 in reslist: 
+				MainPlayList.append([part2[1],sitebase + part2[4]])
+				addCont('[B][COLOR '+part2[0]+']' + part2[1].replace(part2[2],'') + part2[2] + '[/COLOR][/B]' + '[COLOR white]' + part2[3] + '[/COLOR]',sitebase + part2[4],part2[5],part2[3],part2[6],len(reslist))
+			savefile('playlist.txt',str(MainPlayList))
+		paginas(conteudo)
+	xbmc.executebuiltin("Container.SetViewMode(51)")
 
 #Mafarricos,sn - Novas alterações
 def GetThumbExt(extensao):
@@ -484,7 +514,7 @@ def trailer(name):
 	xbmc.Player().play(url, item)
 
 def ReturnStatus(site):
-	if selfAddon.getSetting(site+'-enable') == 'true' and selfAddon.getSetting(site+'-check') == 'true': return True
+	if selfAddon.getSetting(site+'-enable') == 'true': return True
 	return False
 
 def appendValues():
@@ -505,7 +535,47 @@ def appendValues():
 		site.append(MinhaMainURL)
 		label.append('Minhateca')
 		color.append('blue')
+	if ReturnStatus('lolabits'):
+		username.append(username_lb)
+		password.append(selfAddon.getSetting('lolabits-password'))
+		site.append(lolaMainURL)
+		label.append('Lolabits')
+		color.append('green')
+	if ReturnStatus('toutbox'):
+		username.append(username_tb)
+		password.append(selfAddon.getSetting('toutbox-password'))
+		site.append(toutMainURL)
+		label.append('Toutbox')
+		color.append('white')
 	return username,password,site,label,color
+
+def returnValues(link):
+	sitebase = ''
+	nextname = ''
+	color = ''
+	mode = ''
+	if re.search('minhateca.com.br',link):
+		sitebase=MinhaMainURL
+		nextname='Minhateca'
+		color='blue'
+		mode=24
+	if re.search('lolabits.es',link):
+		sitebase=lolaMainURL
+		nextname='Lolabits'
+		color='green'
+		mode=27
+	if re.search('toutbox.fr',link):
+		sitebase=toutMainURL
+		nextname='Toutbox'
+		color='white'
+		mode=28
+	if re.search('abelhas.pt',link):
+		sitebase=MainURL
+		nextname='Abelhas'
+		color='gold'
+		mode=12
+	return sitebase,nextname,color,mode
+
 #Mafarricos,en - Fim de Novas alterações
 
 def obterlistadeficheiros():
@@ -530,113 +600,99 @@ def pastas_ref(url):
       pastas(url,name)
 
 def paginas(link):
-      if re.search('minhateca.com.br',link):
-            sitebase=MinhaMainURL
-            nextname='Minhateca'
-            color='blue'
-            mode=24
-      else:
-            sitebase=MainURL
-            nextname='Abelhas'
-            color='gold'
-            mode=12
-      try:
-            idmode=3
-            try: conteudo=re.compile('<div id="listView".+?>(.+?)<div class="filerow fileItemContainer">').findall(link)[0]
-            except:
-                  try:conteudo=re.compile('<div class="paginator clear searchListPage">(.+?)<div class="clear">').findall(link)[0]
-                  except:
-                        conteudo=re.compile('<div class="paginator clear friendspager">(.+?)<div class="clear">').findall(link)[0]
-                        idmode=9
-            try:
-                  pagina=re.compile('anterior.+?<a href="/(.+?)" class="right" rel="(.+?)"').findall(conteudo)[0]
-                  urlpag=pagina[0]
-                  urlpag=urlpag.replace(' ','+')
-                  addDir('[COLOR '+color+']Página ' + pagina[1] + ' ' + nextname + ' >>>[/COLOR]',sitebase + urlpag,idmode,wtpath + art + 'seta.png',1,True)
-            except:
-                  nrpagina=re.compile('type="hidden" value="([^"]+?)" /><input type="submit" value="p.+?gina seguinte.+?" /></form>').findall(link)[0]
-                  addDir('[COLOR '+color+']Página ' + nrpagina + ' ' + nextname + ' >>>[/COLOR]',sitebase,mode,wtpath + art + 'seta.png',1,True)
-      except: pass
+	sitebase,nexname,color,mode = returnValues(link)
+	try:
+		idmode=3
+		try: conteudo=re.compile('<div id="listView".+?>(.+?)<div class="filerow fileItemContainer">').findall(link)[0]
+		except:
+			  try:conteudo=re.compile('<div class="paginator clear searchListPage">(.+?)<div class="clear">').findall(link)[0]
+			  except:
+					conteudo=re.compile('<div class="paginator clear friendspager">(.+?)<div class="clear">').findall(link)[0]
+					idmode=9
+		try:
+			  pagina=re.compile('anterior.+?<a href="/(.+?)" class="right" rel="(.+?)"').findall(conteudo)[0]
+			  urlpag=pagina[0]
+			  urlpag=urlpag.replace(' ','+')
+			  addDir('[COLOR '+color+']Página ' + pagina[1] + ' ' + nextname + ' >>>[/COLOR]',sitebase + urlpag,idmode,wtpath + art + 'seta.png',1,True)
+		except:
+			  nrpagina=re.compile('type="hidden" value="([^"]+?)" /><input type="submit" value="p.+?gina seguinte.+?" /></form>').findall(link)[0]
+			  addDir('[COLOR '+color+']Página ' + nrpagina + ' ' + nextname + ' >>>[/COLOR]',sitebase,mode,wtpath + art + 'seta.png',1,True)
+	except: pass
 
 ########################################################### PLAYER ################################################
 def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
-      if re.search('minhateca.com.br',url):
-            sitebase=MinhaMainURL
-            host='minhateca.com.br'
-            sitename='Minhateca'
-      else:
-            sitebase=MainURL
-            host='abelhas.pt'
-            sitename='Abelhas.pt'
-      if playlistTitle == '': mensagemprogresso.create(sitename, traducao(40025))
-      linkfinal=''
-      if subtitles=='sim': conteudo=abrir_url_cookie(url)
-      else:conteudo=abrir_url_cookie(url,erro=False)
-      if re.search('Pode acontecer que a mensagem de confirma',conteudo):
-            mensagemok(sitename,'Necessitas de activar a tua conta '+sitename+'.')
-            return
-      try:
-            fileid=re.compile('<input type="hidden" name="FileId" value="(.+?)"/>').findall(conteudo)[0]
-            token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            form_d = {'fileId':fileid,'__RequestVerificationToken':token}
-            ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://' + host, 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://'+host+'/','User-Agent':user_agent}
-            endlogin=sitebase + 'action/License/Download'
-            final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
-            final=final.replace('\u0026','&').replace('\u003c','<').replace('\u003e','>').replace('\\','')
-      except: pass
-      try:
-            if re.search('action/License/acceptLargeTransfer',final):
-                  fileid=re.compile('<input type="hidden" name="fileId" value="(.+?)"').findall(final)[0]
-                  orgfile=re.compile('<input type="hidden" name="orgFile" value="(.+?)"').findall(final)[0]
-                  userselection=re.compile('<input type="hidden" name="userSelection" value="(.+?)"').findall(final)[0]
-                  form_d = {'fileId':fileid,'orgFile':orgfile,'userSelection':userselection,'__RequestVerificationToken':token}
-                  ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://' + sitebase, 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://'+sitebase+'/','User-Agent':user_agent}
-                  endlogin=sitebase + 'action/License/acceptLargeTransfer'
-                  final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
-      except: pass
-      try:
-            if re.search('causar problemas com o uso de aceleradores de download',final):linkfinal=re.compile('a href=\"(.+?)\"').findall(final)[0]
-            else: linkfinal=re.compile('"redirectUrl":"(.+?)"').findall(final)[0]
-            if subtitles=='sim':return linkfinal
-      except:
-            if subtitles=='':
-                  if re.search('Por favor, tenta baixar este ficheiro mais tarde.',final):
-                        mensagemok(sitename,traducao(40026))
-                        return
-                  else:
-                        mensagemok(sitename,traducao(40027))
-                        print str(final)
-                        print str(linkfinal) 
-                        return
-            else: return
-      if playlistTitle == '': mensagemprogresso.close()
-      linkfinal=linkfinal.replace('\u0026','&').replace('\u003c','<').replace('\u003e','>').replace('\\','')
-      print linkfinal
-      if re.search('.jpg',url) or re.search('.png',url) or re.search('.gif',url) or re.search('.bmp',url):
-            if re.search('.jpg',url): extfic='temp.jpg'
-            elif re.search('.png',url): extfic='temp.png'
-            elif re.search('.gif',url): extfic='temp.gif'
-            elif re.search('.bmp',url): extfic='temp.bmp'
-            fich=os.path.join(pastaperfil, extfic)
-            try:os.remove(fich)
-            except:pass
-            if playterm=="download":fazerdownload(extfic,linkfinal)
-            else:fazerdownload(extfic,linkfinal,tipo="fotos")
-            xbmc.executebuiltin("SlideShow("+pastaperfil+")")
-      elif re.search('.mkv',url) or re.search('.ogm',url) or re.search('.avi',url) or re.search('.wmv',url) or re.search('.mp4',url) or re.search('.mpg',url) or re.search('.mpeg',url):
-            endereco=legendas(fileid,url)
-            if playlistTitle <> '': comecarvideo(playlistTitle,linkfinal,playterm=playterm,legendas=endereco)
-            else: comecarvideo(name,linkfinal,playterm=playterm,legendas=endereco)
-      elif re.search('.mp3',url) or re.search('.aac',url) or re.search('.m4a',url) or re.search('.ac3',url) or re.search('.wma',url):
-            if playlistTitle <> '': comecarvideo(playlistTitle,linkfinal,playterm=playterm)
-            else: comecarvideo(name,linkfinal,playterm=playterm)
-      else:
-            if selfAddon.getSetting('aviso-extensao') == 'true': mensagemok(sitename,traducao(40028),traducao(40029),traducao(40030))
-            if playlistTitle <> '': comecarvideo(playlistTitle,linkfinal,playterm=playterm)
-            else: comecarvideo(name,linkfinal,playterm=playterm)
+	sitebase,sitename,color,mode = returnValues(url)
+	host = sitebase.replace('http://','').replace('/','')
+	if playlistTitle == '': mensagemprogresso.create(sitename, traducao(40025))
+	linkfinal=''
+	if subtitles=='sim': conteudo=abrir_url_cookie(url)
+	else:conteudo=abrir_url_cookie(url,erro=False)
+	if re.search('Pode acontecer que a mensagem de confirma',conteudo):
+		mensagemok(sitename,'Necessitas de activar a tua conta '+sitename+'.')
+		return
+	try:
+		fileid=re.compile('<input type="hidden" name="FileId" value="(.+?)"/>').findall(conteudo)[0]
+		token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		form_d = {'fileId':fileid,'__RequestVerificationToken':token}
+		ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://' + host, 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://'+host+'/','User-Agent':user_agent}
+		endlogin=sitebase + 'action/License/Download'
+		final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+		final=final.replace('\u0026','&').replace('\u003c','<').replace('\u003e','>').replace('\\','')
+	except: pass
+	try:
+		if re.search('action/License/acceptLargeTransfer',final):
+			  fileid=re.compile('<input type="hidden" name="fileId" value="(.+?)"').findall(final)[0]
+			  orgfile=re.compile('<input type="hidden" name="orgFile" value="(.+?)"').findall(final)[0]
+			  userselection=re.compile('<input type="hidden" name="userSelection" value="(.+?)"').findall(final)[0]
+			  form_d = {'fileId':fileid,'orgFile':orgfile,'userSelection':userselection,'__RequestVerificationToken':token}
+			  ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://' + sitebase, 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://'+sitebase+'/','User-Agent':user_agent}
+			  endlogin=sitebase + 'action/License/acceptLargeTransfer'
+			  final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+	except: pass
+	try:
+		if re.search('causar problemas com o uso de aceleradores de download',final):linkfinal=re.compile('a href=\"(.+?)\"').findall(final)[0]
+		else: linkfinal=re.compile('"redirectUrl":"(.+?)"').findall(final)[0]
+		if subtitles=='sim':return linkfinal
+	except:
+		if subtitles=='':
+			  if re.search('Por favor, tenta baixar este ficheiro mais tarde.',final):
+					mensagemok(sitename,traducao(40026))
+					return
+			  else:
+					mensagemok(sitename,traducao(40027))
+					print str(final)
+					print str(linkfinal) 
+					return
+		else: return
+	if playlistTitle == '': mensagemprogresso.close()
+	linkfinal=linkfinal.replace('\u0026','&').replace('\u003c','<').replace('\u003e','>').replace('\\','')
+	print linkfinal
+	if re.search('.jpg',url) or re.search('.png',url) or re.search('.gif',url) or re.search('.bmp',url):
+		if re.search('.jpg',url): extfic='temp.jpg'
+		elif re.search('.png',url): extfic='temp.png'
+		elif re.search('.gif',url): extfic='temp.gif'
+		elif re.search('.bmp',url): extfic='temp.bmp'
+		fich=os.path.join(pastaperfil, extfic)
+		try:os.remove(fich)
+		except:pass
+		if playterm=="download":fazerdownload(extfic,linkfinal)
+		else:fazerdownload(extfic,linkfinal,tipo="fotos")
+		xbmc.executebuiltin("SlideShow("+pastaperfil+")")
+	elif re.search('.mkv',url) or re.search('.ogm',url) or re.search('.avi',url) or re.search('.wmv',url) or re.search('.mp4',url) or re.search('.mpg',url) or re.search('.mpeg',url):
+		endereco=legendas(fileid,url)
+		if playlistTitle <> '': comecarvideo(playlistTitle,linkfinal,playterm=playterm,legendas=endereco)
+		else: comecarvideo(name,linkfinal,playterm=playterm,legendas=endereco)
+	elif re.search('.mp3',url) or re.search('.aac',url) or re.search('.m4a',url) or re.search('.ac3',url) or re.search('.wma',url):
+		if playlistTitle <> '': comecarvideo(playlistTitle,linkfinal,playterm=playterm)
+		else: comecarvideo(name,linkfinal,playterm=playterm)
+	else:
+		if selfAddon.getSetting('aviso-extensao') == 'true': mensagemok(sitename,traducao(40028),traducao(40029),traducao(40030))
+		if playlistTitle <> '': comecarvideo(playlistTitle,linkfinal,playterm=playterm)
+		else: comecarvideo(name,linkfinal,playterm=playterm)
 
 def comecarvideo(name,url,playterm,legendas=None):
 	if re.search('minhateca.com.br',url): sitename='Minhateca - '+name
+	elif re.search('lolabits',url): sitename='Lolabits - '+name	
 	else: sitename='Abelhas - '+name
 	playeractivo = xbmc.getCondVisibility('Player.HasMedia')
 	if playterm=='download':
@@ -693,10 +749,8 @@ def legendas(moviefileid,url):
 def add_to_library(name,url,updatelibrary=True):
 	if not xbmcvfs.exists(moviesFolder): xbmcvfs.mkdir(moviesFolder)
 	name2 = re.compile('\[B\]\[COLOR .+?\](.+?)\[/COLOR\]\[/B\]').findall(name)
-	print name,name2,'merda'
 	if name2: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name2[0][:-4])
 	else: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name[:-4])
-	print 'xit %s' % cleaned_title
 	movie_folder = os.path.join(moviesFolder,cleaned_title)
 	if not xbmcvfs.exists(movie_folder): xbmcvfs.mkdir(movie_folder)
 	strm_contents = 'plugin://plugin.video.abelhas/?url=' + url +'&mode=25&name=' + urllib.quote_plus(cleaned_title)
@@ -808,6 +862,8 @@ def caixadetexto(url,ftype=''):
       save=False
       if url=='pastas' and re.search('Abelha',name): title="Ir para - Abelhas.pt"
       elif url=='pastas' and re.search('Minhateca',name): title="Ir para - Minhateca"
+      elif url=='pastas' and re.search('Lolabits',name): title="Ir para - Lolabits"
+      elif url=='pastas' and re.search('Toutbox',name): title="Ir para - Toutbox"
       elif url=='password': title="Password - Abelhas.pt"
       elif url=='pesquisa':
             title=traducao(40031)
@@ -831,6 +887,12 @@ def caixadetexto(url,ftype=''):
 				if ReturnStatus('minhateca'):
 					form_d = {'FileName':encode,'submitSearchFiles':'Buscar','FileType':ftype,'IsGallery':'False'}
 					pastas(MinhaMainURL + 'action/SearchFiles',name,formcont=form_d,past=True)
+				if ReturnStatus('lolabits'):
+					form_d = {'FileName':encode,'submitSearchFiles':'Buscar','FileType':ftype,'IsGallery':'False'}
+					pastas(lolaMainURL + 'action/SearchFiles',name,formcont=form_d,past=True)
+				if ReturnStatus('toutbox'):
+					form_d = {'FileName':encode,'submitSearchFiles':'Chercher','FileType':ftype,'IsGallery':'False'}
+					pastas(toutMainURL + 'action/SearchFiles',name,formcont=form_d,past=True)					
       else: sys.exit(0)
             
 def abrir_url(url):
@@ -865,6 +927,8 @@ def abrir_url_cookie(url,erro=True):
       try:
             if ReturnStatus('abelhas'): ref_data = {'Host': 'abelhas.pt', 'Connection': 'keep-alive', 'Referer': 'http://abelhas.pt/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://abelhas.pt/'}
             if ReturnStatus('minhateca'): ref_data = {'Host': 'minhateca.com.br', 'Connection': 'keep-alive', 'Referer': 'http://minhateca.com.br/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://minhateca.com.br/'}
+            if ReturnStatus('lolabits'): ref_data = {'Host': 'lolabits.es', 'Connection': 'keep-alive', 'Referer': 'http://lolabits.es','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://lolabits.es'}
+            if ReturnStatus('toutbox'): ref_data = {'Host': 'toutbox.fr', 'Connection': 'keep-alive', 'Referer': 'http://toutbox.fr','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://toutbox.fr'}
             link=net.http_POST(url,ref_data).content.encode('latin-1','ignore')
             return link
       except urllib2.HTTPError, e:
@@ -925,11 +989,11 @@ print "Name: "+str(name)
 print "Name: "+str(tamanhoparavariavel)
 
 if mode==None or url==None or len(url)<1:
-	if selfAddon.getSetting('abelhas-enable') == 'false' and selfAddon.getSetting('minhateca-enable') == 'false':
+	if selfAddon.getSetting('abelhas-enable') == 'false' and selfAddon.getSetting('minhateca-enable') == 'false' and selfAddon.getSetting('lolabits-enable') == 'false'  and selfAddon.getSetting('toutbox-enable') == 'false':
 		ok = mensagemok('Abelhas.pt / Minhateca','Precisa de configurar a(s) conta(s)','para aceder aos conteudos.')
 		entrarnovamente(1)
 	else:
-		if (selfAddon.getSetting('abelhas-enable') == 'true' and not selfAddon.getSetting('abelhas-username')== '') or (selfAddon.getSetting('minhateca-enable') == 'true' and not selfAddon.getSetting('minhateca-username')== ''): login()
+		if (selfAddon.getSetting('abelhas-enable') == 'true' and not selfAddon.getSetting('abelhas-username')== '') or (selfAddon.getSetting('minhateca-enable') == 'true' and not selfAddon.getSetting('minhateca-username')== '') or (selfAddon.getSetting('lolabits-enable') == 'true' and not selfAddon.getSetting('lolabits-username')== '') or (selfAddon.getSetting('toutbox-enable') == 'true' and not selfAddon.getSetting('toutbox-username')== ''): login()
 		menu_principal(1)
 elif mode==1: topcolecionadores()
 elif mode==2: abelhasmaisrecentes(url)
@@ -957,4 +1021,6 @@ elif mode==23: pastas_de_fora(url,name)
 elif mode==24: proxpesquisa_mt()
 elif mode==25: play_from_outside(name,url)
 elif mode==26: add_to_library(name,url)
+elif mode==27: proxpesquisa_lb()
+elif mode==28: proxpesquisa_tb()
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

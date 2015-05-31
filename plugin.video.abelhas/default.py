@@ -29,6 +29,9 @@ username_mt = urllib.quote(selfAddon.getSetting('minhateca-username'))
 username_lb = urllib.quote(selfAddon.getSetting('lolabits-username'))
 username_tb = urllib.quote(selfAddon.getSetting('toutbox-username'))
 moviesFolder = xbmc.translatePath(selfAddon.getSetting('libraryfolder'))
+listURL = [MainURL, MinhaMainURL, lolaMainURL, toutMainURL]
+nameURL = ['Abelhas', 'Minhateca', 'Lolabits', 'Toutbox']
+usernameURL = [urllib.quote(selfAddon.getSetting('abelhas-username')), urllib.quote(selfAddon.getSetting('minhateca-username')), urllib.quote(selfAddon.getSetting('lolabits-username')), urllib.quote(selfAddon.getSetting('toutbox-username'))]
 MainPlayList = []
 
 #################################################### LOGIN ABELHAS #####################################################
@@ -72,18 +75,10 @@ def menu_principal(ligacao):
 		addDir('[B][COLOR red]Addon em actualização/manutenção! Possíveis bugs.[/COLOR][/B]',MainURL,1,wtpath + art + 'pasta.png',1,True)
 		addDir(traducao(40007),MainURL,1,wtpath + art + 'pasta.png',1,True)
 		addDir('Mais Recentes',MainURL,2,wtpath + art + 'pasta.png',2,True)
-		if ReturnStatus('abelhas'): 
-			addDir('A Minha Abelha',MainURL + username_ab,3,wtpath + art + 'pasta.png',2,True)
-			addDir('Ir para uma Abelha','pastas',5,wtpath + art + 'pasta.png',2,True)
-		if ReturnStatus('minhateca'): 
-			addDir('A Minha Minhateca',MinhaMainURL + username_mt,3,wtpath + art + 'pasta.png',2,True)
-			addDir('Ir para uma Minhateca','pastas',5,wtpath + art + 'pasta.png',2,True)
-		if ReturnStatus('lolabits'): 
-			addDir('A Minha Lolabits',lolaMainURL + username_lb,3,wtpath + art + 'pasta.png',2,True)
-			addDir('Ir para uma Lolabits','pastas',5,wtpath + art + 'pasta.png',2,True)				
-		if ReturnStatus('toutbox'): 
-			addDir('A Minha Toutbox',toutMainURL + username_lb,3,wtpath + art + 'pasta.png',2,True)
-			addDir('Ir para uma Toutbox','pastas',5,wtpath + art + 'pasta.png',2,True)				
+		for x in range(0, len(listURL)):
+			if ReturnStatus(nameURL[x].lower()): addDir('A Minha '+nameURL[x],listURL[x] + usernameURL[x],3,wtpath + art + 'pasta.png',2,True)
+		for x in range(0, len(listURL)):
+			if ReturnStatus(nameURL[x].lower()): addDir('Ir para uma '+nameURL[x],'pastas',5,wtpath + art + 'pasta.png',2,True)
 		addDir(traducao(40037),MainURL,9,wtpath + art + 'pasta.png',2,True)
 		addDir('Atalhos',MainURL,18,wtpath + art + 'pasta.png',2,True)
 		addDir(traducao(40011),'pesquisa',7,wtpath + art + 'pasta.png',3,True)
@@ -112,15 +107,15 @@ def abelhasmaisrecentes(url):
 	xbmcplugin.setContent(int(sys.argv[1]), 'livetv')
 
 def pesquisa():
-      if ReturnStatus('abelhas'): conteudo=clean(abrir_url_cookie(MainURL+'action/Help'))
-      elif ReturnStatus('minhateca'): conteudo=clean(abrir_url_cookie(MinhaMainURL+'action/Help'))
-      elif ReturnStatus('lolabits'): conteudo=clean(abrir_url_cookie(lolaMainURL+'action/Help'))
-      elif ReturnStatus('toutbox'): conteudo=clean(abrir_url_cookie(toutMainURL+'action/Help'))	  
-      opcoeslabel=re.compile('<option value=".+?">(.+?)</option>').findall(conteudo)
-      opcoesvalue=re.compile('<option value="(.+?)">.+?</option>').findall(conteudo)
-      index = xbmcgui.Dialog().select(traducao(40022), opcoeslabel)
-      if index > -1: caixadetexto('pesquisa',ftype=opcoesvalue[index])
-      else:sys.exit(0)
+	opcoeslabel = []
+	for x in range(0, len(listURL)):
+		if ReturnStatus(nameURL[x].lower()): 
+			conteudo=clean(abrir_url_cookie(listURL[x]+'action/Help'))
+			if not opcoeslabel: opcoeslabel=re.compile('<option value=".+?">(.+?)</option>').findall(conteudo)
+	opcoesvalue=re.compile('<option value="(.+?)">.+?</option>').findall(conteudo)
+	index = xbmcgui.Dialog().select(traducao(40022), opcoeslabel)
+	if index > -1: caixadetexto('pesquisa',ftype=opcoesvalue[index])
+	else:sys.exit(0)
 
 def favoritos():
 	username,password,site,label,color = appendValues()		
@@ -240,7 +235,8 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 			  except: ftype='All'
 			  pagina=1
 			  token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
-			  form_d = {'IsGallery':'False','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
+			  if selfAddon.getSetting('activate-size') == 'true': form_d = {'IsGallery':'False','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token,'SizeFrom':selfAddon.getSetting('min-size'),'SizeTo':selfAddon.getSetting('max-size')}
+			  else: form_d = {'IsGallery':'False','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
 			  from t0mm0.common.addon import Addon
 			  addon=Addon(addon_id)
 			  addon.save_data('temp.txt',form_d)
@@ -327,7 +323,6 @@ def ReturnConteudo(conteudo,past,color):
 	reslist = []
 	section = re.compile('<div class="filerow fileItemContainer">(.+?)</ul></div>\s+</div>', re.DOTALL).findall(conteudo)
 	if not section: section = re.compile('<div class="filerow fileItemContainer">(.+?)</div></div>', re.DOTALL).findall(conteudo)
-	print section
 	for part in section:
 		name = re.compile('<span class="bold">(.+?)</span>(.+?)\s+</a>', re.DOTALL).findall(part)
 		if not name: name = re.compile('<span class="bold">(.+?)</span>(.+?)</a>', re.DOTALL).findall(part)
@@ -600,7 +595,8 @@ def pastas_ref(url):
       pastas(url,name)
 
 def paginas(link):
-	sitebase,nexname,color,mode = returnValues(link)
+	sitebase,nextname,color,mode = returnValues(link)
+	print link
 	try:
 		idmode=3
 		try: conteudo=re.compile('<div id="listView".+?>(.+?)<div class="filerow fileItemContainer">').findall(link)[0]
@@ -879,6 +875,8 @@ def caixadetexto(url,ftype=''):
             if save==True: selfAddon.setSetting('ultima-pesquisa', search)
             if url=='pastas' and re.search('Abelha',name): pastas(MainURL + search,name)
             elif url=='pastas' and re.search('Minhateca',name): pastas(MinhaMainURL + search,name) 
+            elif url=='pastas' and re.search('Lolabits',name): pastas(lolaMainURL + search,name)
+            elif url=='pastas' and re.search('Toutbox',name): pastas(toutMainURL + search,name)
             elif url=='password': return search
             elif url=='pesquisa':
 				if ReturnStatus('abelhas'):

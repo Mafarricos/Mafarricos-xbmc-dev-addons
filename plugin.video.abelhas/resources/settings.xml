@@ -26,6 +26,12 @@
       <setting id="ultima-pesquisa" type="text" label="Ultima pesquisa" default="" visible="false"/>
 	  <setting id="libraryfolder" type="folder" label="30147" default="special://userdata/addon_data/plugin.video.abelhas/Movies"/>
    </category>
+	<category label="Pesquisa">
+		<setting id="activate-size" type="bool" label="Limitar Tamanho" default="false"/>
+		<setting type="sep"/>
+		<setting id="min-size" type="number" label="Tamanho Mínimo (MB)" enable="!eq(-2,false)" default="0"/>
+		<setting id="max-size" type="number" label="Tamanho Máximo (MB)" enable="!eq(-3,false)" default="0"/>
+	</category>
 	<category label="30140">
 		<setting id="subtitles" type="bool" label="30143" default="false"/>
 		<setting type="sep"/>

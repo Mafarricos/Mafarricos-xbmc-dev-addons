@@ -23,8 +23,8 @@
 		<setting id="toutbox-check" type="bool" label="30000" default="false" visible="false"/>
 	</category>
 	<category label="Configurações Gerais">
-		<setting id=filesorder label="Ordenação Ficheiros" type="enum" values="Nome|Tipo Ficheiro|Tamanho|Adicionado a" default="0"/>
-		<setting id=fileasc label="Ordenação" type="enum" values="Ascendente|Descendente" default="0"/>
+		<setting id="filesorder" label="Ordenação Ficheiros" type="enum" values="Nome|Tipo Ficheiro|Tamanho|Adicionado a" default="0"/>
+		<setting id="fileasc" label="Ordenação" type="enum" values="Ascendente|Descendente" default="0"/>
 		<setting type="sep"/>
 		<setting id="aviso-extensao" type="bool" label="30000" default="true"/>
 		<setting id="ultima-pesquisa" type="text" label="Ultima pesquisa" default="" visible="false"/>
@@ -38,6 +38,8 @@
 		<setting type="sep"/>
 		<setting id="min-size" type="number" label="Tamanho Mínimo (MB)" enable="!eq(-2,false)" default="0"/>
 		<setting id="max-size" type="number" label="Tamanho Máximo (MB)" enable="!eq(-3,false)" default="0"/>
+		<setting type="sep"/>
+		<setting id="folder-type" type="enum" label="Tipo de Pasta" default="0" values="Pasta|Dialogo"/>
 	</category>
 	<category label="30140">
 		<setting id="subtitles" type="bool" label="30143" default="false"/>

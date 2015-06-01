@@ -29,6 +29,7 @@ username_mt = urllib.quote(selfAddon.getSetting('minhateca-username'))
 username_lb = urllib.quote(selfAddon.getSetting('lolabits-username'))
 username_tb = urllib.quote(selfAddon.getSetting('toutbox-username'))
 moviesFolder = xbmc.translatePath(selfAddon.getSetting('libraryfolder'))
+foldertype = int(selfAddon.getSetting('folder-type'))
 listURL = [MainURL, MinhaMainURL, lolaMainURL, toutMainURL]
 nameURL = ['Abelhas', 'Minhateca', 'Lolabits', 'Toutbox']
 usernameURL = [urllib.quote(selfAddon.getSetting('abelhas-username')), urllib.quote(selfAddon.getSetting('minhateca-username')), urllib.quote(selfAddon.getSetting('lolabits-username')), urllib.quote(selfAddon.getSetting('toutbox-username'))]
@@ -222,6 +223,10 @@ def atalhos(type=False):
                   xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
+	if foldertype == 1 and re.search('action/SearchFiles',url) and not deFora:
+		source = xbmcgui.Dialog().select
+		selectlist = []
+		urllist = []
 	sitebase,name,color,mode = returnValues(url)
 	host = sitebase.replace('http://','').replace('/','')	
 	if re.search('action/SearchFiles',url):
@@ -298,16 +303,27 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 					addDir('[B][COLOR white]' + nomepasta + '[/COLOR][/B]' + displock,sitebase + urlpasta,3,wtpath + art + 'pasta.png',len(seleccionados),True)
 		except: pass
 		reslist = []
-		reslist = ReturnConteudo(conteudo,past,color)
+		reslist = ReturnConteudo(conteudo,past,color,url,deFora)
 		if reslist:
-			if re.search('action/SearchFiles',url) and selfAddon.getSetting('search-order') == 'true': reslist = sorted(reslist, key=getKey,reverse=True)
-			global MainPlaylist
-			for part1,part2 in reslist: 
-				MainPlayList.append([part2[1],sitebase + part2[4]])
-				addCont('[B][COLOR '+part2[0]+']' + part2[1].replace(part2[2],'') + part2[2] + '[/COLOR][/B]' + '[COLOR white]' + part2[3] + '[/COLOR]',sitebase + part2[4],part2[5],part2[3],part2[6],len(reslist))
-			savefile('playlist.txt',str(MainPlayList))
-		paginas(conteudo)
-	xbmc.executebuiltin("Container.SetViewMode(51)")
+			if deFora:
+				reslist = sorted(reslist, key=getKey,reverse=True)
+				analyzer(sitebase + reslist[1][1][4])
+			else:
+				if re.search('action/SearchFiles',url) and selfAddon.getSetting('search-order') == 'true': reslist = sorted(reslist, key=getKey,reverse=True)
+				global MainPlaylist
+				for part1,part2 in reslist: 
+					if foldertype == 1 and re.search('action/SearchFiles',url):
+						selectlist.append(part2[0])
+						urllist.append(part2[1])
+					else:
+						MainPlayList.append([part2[1],sitebase + part2[4]])
+						addCont('[B][COLOR '+part2[0]+']' + part2[1].replace(part2[2],'') + part2[2] + '[/COLOR][/B]' + '[COLOR white]' + part2[3] + '[/COLOR]',sitebase + part2[4],part2[5],part2[3],part2[6],len(reslist))
+				if foldertype == 1 and re.search('action/SearchFiles',url): 
+					choose=source('Link a Abrir',selectlist)
+					if choose > -1:	analyzer(urllist[choose])
+				savefile('playlist.txt',str(MainPlayList))
+		if foldertype == 0 or (foldertype == 1 and not re.search('action/SearchFiles',url)) and not deFora: paginas(conteudo)
+	if foldertype == 0 or (foldertype == 1 and not re.search('action/SearchFiles',url)) and not deFora: xbmc.executebuiltin("Container.SetViewMode(51)")
 
 #Mafarricos,sn - Novas alterações
 def returnExtra():
@@ -331,7 +347,7 @@ def GetThumbExt(extensao):
 	elif extensao=='.mkv' or extensao == '.ogm' or extensao == '.avi' or extensao=='.mp4' or extensao=='.3gp' or extensao=='.wmv' or extensao=='.mpg' or extensao=='.mpeg': return wtpath + art + 'video.png'
 	else: return wtpath + art + 'file.png'
 
-def ReturnConteudo(conteudo,past,color):
+def ReturnConteudo(conteudo,past,color,url2,deFora):
 	diffItems = False
 	reslist = []
 	section = re.compile('<div class="filerow fileItemContainer">(.+?)</ul></div>\s+</div>', re.DOTALL).findall(conteudo)
@@ -350,7 +366,9 @@ def ReturnConteudo(conteudo,past,color):
 		tamanhoficheiro = size[0]
 		tamanhoficheiro=tamanhoficheiro.replace(' ','')
 		tamanhoparavariavel=' (' + tamanhoficheiro + ')'
-		reslist = SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,4,thumb,reslist)
+		if deFora: reslist = SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,4,thumb,reslist)
+		elif foldertype == 1 and re.search('action/SearchFiles',url2): reslist = SearchResultsFora(tamanhoficheiro,'[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,color,reslist)
+		else: reslist = SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,4,thumb,reslist)
 	return reslist
 
 def SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,modo,thumb,reslist):
@@ -368,7 +386,7 @@ def SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavaria
 	reslist.append([tamanhoficheiro,listresults])
 	return reslist
 
-def SearchResultsFora(tamanhoficheiro,label,url,reslist):
+def SearchResultsFora(tamanhoficheiro,label,url,color,reslist):
 	listresults = []
 	listresults.append(label)
 	listresults.append(url)
@@ -383,121 +401,9 @@ def getKey(item):
 
 def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
 	login(True)
-	source = xbmcgui.Dialog().select
-	selectlist = []
-	urllist = []
-	formcont = {'submitSearchFiles': 'Procurar', 'FileType': 'video', 'IsGallery': 'False', 'FileName': name }
-	if re.search('action/SearchFiles',url):
-		ref_data = {'Host': 'abelhas.pt', 'Connection': 'keep-alive', 'Referer': 'http://abelhas.pt/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://abelhas.pt/'}
-		endlogin=MainURL + 'action/SearchFiles'
-		conteudo= net.http_POST(endlogin,form_data=formcont,headers=ref_data).content.encode('latin-1','ignore')
-		if re.search('O ficheiro n&#227;o foi encontrado',conteudo):
-			mensagemok('Abelhas.pt','Sem resultados.')
-			sys.exit(0)
-		try:
-			filename=re.compile('<input name="FileName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-			try:ftype=re.compile('<input name="FileType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-			except: ftype='All'
-			pagina=1
-			token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
-			form_d = {'IsGallery':'False','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
-			from t0mm0.common.addon import Addon
-			addon=Addon(addon_id)
-			addon.save_data('temp.txt',form_d)
-			ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
-			endlogin=MainURL + 'action/SearchFiles/Results'
-			conteudo= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
-		except: pass
-	else:
-		if conteudo=='':
-			extra=returnExtra()
-			conteudo=clean(abrir_url_cookie(url + extra))
-	if re.search('ProtectedFolderChomikLogin',conteudo):
-		chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-		folderid=re.compile('<input id="FolderId" name="FolderId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-		foldername=re.compile('<input id="FolderName" name="FolderName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-		token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-		passwordfolder=caixadetexto('password')
-		form_d = {'ChomikId':chomikid,'FolderId':folderid,'FolderName':foldername,'Password':passwordfolder,'Remember':'true','__RequestVerificationToken':token}
-		ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
-		endlogin=MainURL + 'action/Files/LoginToFolder'
-		teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
-		teste=urllib.unquote(teste)
-		if re.search('IsSuccess":false',teste):
-			mensagemok('Abelhas.pt',traducao(40002))
-			sys.exit(0)
-		else: pastas_ref(url)
-	elif re.search('/action/UserAccess/LoginToProtectedWindow',conteudo):
-		chomikid=re.compile('<input id="TargetChomikId" name="TargetChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-		chomiktype=re.compile('<input id="ChomikType" name="ChomikType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-		sex=re.compile('<input id="Sex" name="Sex" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-		accname=re.compile('<input id="AccountName" name="AccountName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-		isadult=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-		adultfilter=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-		passwordfolder=caixadetexto('password')
-		form_d = {'Password':passwordfolder,'OK':'OK','RemeberMe':'true','IsAdult':isadult,'Sex':sex,'AccountName':accname,'AdultFilter':adultfilter,'ChomikType':chomiktype,'TargetChomikId':chomikid}
-		ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
-		endlogin=MainURL + 'action/UserAccess/LoginToProtectedWindow'
-		teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
-		teste=urllib.unquote(teste)
-		if re.search('<span class="field-validation-error">A password introduzida est',teste):
-			mensagemok('Abelhas.pt',traducao(40002))
-			sys.exit(0)
-		else: pastas_ref(url)
-	else:
-		try:
-			conta=re.compile('<div class="bigFileInfoRight">.+?<h3>(.+?)<span>(.+?)</span></h3>').findall(conteudo)[0]
-			nomeconta=re.compile('<input id="FriendsTargetChomikName" name="FriendsTargetChomikName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-			addLink('[COLOR blue][B]' + traducao(40023) + nomeconta + '[/B][/COLOR]: ' + conta[0] + conta[1],'',wtpath + art + 'star2.png')
-		except: pass
-		try:
-			checker=url.split('/')[:-1]
-			if len(checker) > 3 and not re.search('action/SearchFiles',url) and not re.search('abelhas.pt/action/nada',url):
-				urlbefore='/'.join(checker)
-				addDir('[COLOR blue][B]Uma pasta atrás[/B][/COLOR]',urlbefore,3,wtpath + art + 'seta.png',1,True)
-		except: pass
-		try:
-			pastas=re.compile('<div id="foldersList">(.+?)</table>').findall(conteudo)[0]
-			seleccionados=re.compile('<a href="/(.+?)".+?title="(.+?)">(.+?)</a>').findall(pastas)
-			for urlpasta,nomepasta,password in seleccionados:
-				if re.search('<span class="pass">',password): displock=' (' + traducao(40024)+')'
-				else:displock=''
-				addDir(nomepasta + displock,MainURL + urlpasta,3,wtpath + art + 'pasta.png',len(seleccionados),True)
-		except: pass
-		reslist = []
-		items1=re.compile('<li class="fileItemContainer">\s+<p class="filename">\s+<a class="downloadAction" href=".+?">    <span class="bold">.+?</span>(.+?)</a>\s+</p>\s+<div class="thumbnail">\s+<div class="thumbnailWrapper expType" rel="Image" style=".+?">\s+<a href="(.+?)" class="thumbImg" rel="highslide" style=".+?" title="(.+?)">\s+<img src=".+?" rel=".+?" alt=".+?" style=".+?"/>\s+</a>\s+</div>\s+</div>\s+<div class="smallTab">\s+<ul>\s+<li>\s+(.+?)</li>\s+<li><span class="date">(.+?)</span></li>').findall(conteudo)         
-		for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items1:
-			extensao=extensao.replace(' ','')
-			tamanhoficheiro=tamanhoficheiro.replace(' ','')
-			tamanhoparavariavel=' (' + tamanhoficheiro + ')'
-			if past==False: modo=4
-			else: modo=22
-			if modo==4: reslist = SearchResultsFora('[B]' + tituloficheiro + extensao + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,reslist)
-		items2=re.compile('<a class="downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
-		for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2:
-			extensao=extensao.replace(' ','')
-			tamanhoparavariavel=' (' + tamanhoficheiro + ')'
-			if past==False: modo=4
-			else: modo=22
-			if modo==4: reslist = SearchResultsFora('[B]' + tituloficheiro + extensao + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,reslist)
-		if not items1:
-			if not items2:
-				conteudo=clean(conteudo)
-				items3=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
-				for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3:
-					tamanhoficheiro=tamanhoficheiro.replace(' ','')
-					thumb=wtpath + art + 'file.png'
-					tamanhoparavariavel=' (' + tamanhoficheiro + ')'
-					if past==False: modo=4
-					else: modo=22
-					if modo == 4: reslist = SearchResultsFora(tamanhoficheiro,'[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,reslist)
-	if reslist:
-		reslist = sorted(reslist, key=getKey,reverse=True)
-		for part1,part2 in reslist:
-			selectlist.append(part2[0])
-			urllist.append(part2[1])		
-	choose=source('Link a Abrir',selectlist)
-	if choose > -1:	analyzer(urllist[choose])
+	if selfAddon.getSetting('activate-size') == 'true': formcont = {'IsGallery':'False','FileName':name,'FileType':'video','ShowAdultContent':'True','SizeFrom':selfAddon.getSetting('min-size'),'SizeTo':selfAddon.getSetting('max-size')}
+	else: formcont = {'submitSearchFiles': 'Procurar', 'FileType': 'video', 'IsGallery': 'False', 'FileName': name }
+	pastas(url,name,formcont,conteudo,False,True)
 
 def criarplaylist(url,name):
 	playlist = xbmc.PlayList(1)
@@ -583,7 +489,6 @@ def returnValues(link):
 		color='gold'
 		mode=12
 	return sitebase,nextname,color,mode
-
 #Mafarricos,en - Fim de Novas alterações
 
 def obterlistadeficheiros():

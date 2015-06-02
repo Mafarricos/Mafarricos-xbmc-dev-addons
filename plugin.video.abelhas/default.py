@@ -307,6 +307,7 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 		if reslist:
 			if deFora:
 				reslist = sorted(reslist, key=getKey,reverse=True)
+				#print reslist
 				analyzer(sitebase + reslist[1][1][4])
 			else:
 				if re.search('action/SearchFiles',url) and selfAddon.getSetting('search-order') == 'true': reslist = sorted(reslist, key=getKey,reverse=True)
@@ -352,12 +353,14 @@ def ReturnConteudo(conteudo,past,color,url2,deFora):
 	reslist = []
 	section = re.compile('<div class="filerow fileItemContainer">(.+?)</ul></div>\s+</div>', re.DOTALL).findall(conteudo)
 	if not section: section = re.compile('<div class="filerow fileItemContainer">(.+?)</div></div>', re.DOTALL).findall(conteudo)
+	if not section: section = re.compile('<li class="fileItemContainer">(.+?)<li><span class="date">', re.DOTALL).findall(conteudo)
 	for part in section:
 		name = re.compile('<span class="bold">(.+?)</span>(.+?)\s+</a>', re.DOTALL).findall(part)
 		if not name: name = re.compile('<span class="bold">(.+?)</span>(.+?)</a>', re.DOTALL).findall(part)
 		url = re.compile('href="/(.+?)"', re.DOTALL).findall(part)
 		img = re.compile('<img src="(.+?)"', re.DOTALL).findall(part)
 		size = re.compile('<li><span>(.+?)</span></li>', re.DOTALL).findall(part)
+		if not size: size = re.compile('<li>\s+(.+?)\s+</li>', re.DOTALL).findall(part)
 		tituloficheiro = name[0][0]
 		extensao = name[0][1]
 		urlficheiro = url[0]
@@ -401,7 +404,7 @@ def getKey(item):
 
 def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
 	login(True)
-	if selfAddon.getSetting('activate-size') == 'true': formcont = {'IsGallery':'False','FileName':name,'FileType':'video','ShowAdultContent':'True','SizeFrom':selfAddon.getSetting('min-size'),'SizeTo':selfAddon.getSetting('max-size')}
+	if selfAddon.getSetting('activate-size') == 'true': formcont = {'submitSearchFiles': 'Procurar', 'IsGallery':'False','FileName':name,'FileType':'video','ShowAdultContent':'True','SizeFrom':selfAddon.getSetting('min-size'),'SizeTo':selfAddon.getSetting('max-size')}
 	else: formcont = {'submitSearchFiles': 'Procurar', 'FileType': 'video', 'IsGallery': 'False', 'FileName': name }
 	pastas(url,name,formcont,conteudo,False,True)
 

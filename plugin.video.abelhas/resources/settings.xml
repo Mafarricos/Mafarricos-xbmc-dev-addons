@@ -30,6 +30,7 @@
 		<setting id="ultima-pesquisa" type="text" label="Ultima pesquisa" default="" visible="false"/>
 		<setting type="sep"/>
 		<setting id="libraryfolder" type="folder" label="30147" default="special://userdata/addon_data/plugin.video.abelhas/Movies"/>
+		<setting id="tvshowlibraryfolder" type="folder" label="30148" default="special://userdata/addon_data/plugin.video.abelhas/TVshows"/>		
 	</category>
 	<category label="Pesquisa">
 		<setting id="search-order" type="bool" label="Ordenar por Tamanho" default="false"/>

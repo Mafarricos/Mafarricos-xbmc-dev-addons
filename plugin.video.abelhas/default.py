@@ -29,6 +29,7 @@ username_mt = urllib.quote(selfAddon.getSetting('minhateca-username'))
 username_lb = urllib.quote(selfAddon.getSetting('lolabits-username'))
 username_tb = urllib.quote(selfAddon.getSetting('toutbox-username'))
 moviesFolder = xbmc.translatePath(selfAddon.getSetting('libraryfolder'))
+tvshowFolder = xbmc.translatePath(selfAddon.getSetting('tvshowlibraryfolder'))
 foldertype = int(selfAddon.getSetting('folder-type'))
 listURL = [MainURL, MinhaMainURL, lolaMainURL, toutMainURL]
 nameURL = ['Abelhas', 'Minhateca', 'Lolabits', 'Toutbox']
@@ -662,16 +663,25 @@ def legendas(moviefileid,url):
       legendas=analyzer(url,subtitles='sim')
       return legendas
 
-def add_to_library(name,url,updatelibrary=True):
-	if not xbmcvfs.exists(moviesFolder): xbmcvfs.mkdir(moviesFolder)
+def add_to_library(name,url,type,updatelibrary=True): 
+	if type == 'movie': 
+		if not xbmcvfs.exists(moviesFolder): xbmcvfs.mkdir(moviesFolder)
+	elif type == 'tvshow': 
+		if not xbmcvfs.exists(tvshowFolder): xbmcvfs.mkdir(tvshowFolder)
 	name2 = re.compile('\[B\]\[COLOR .+?\](.+?)\[/COLOR\]\[/B\]').findall(name)
 	if name2: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name2[0][:-4])
 	else: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name[:-4])
-	movie_folder = os.path.join(moviesFolder,cleaned_title)
-	if not xbmcvfs.exists(movie_folder): xbmcvfs.mkdir(movie_folder)
-	strm_contents = 'plugin://plugin.video.abelhas/?url=' + url +'&mode=25&name=' + urllib.quote_plus(cleaned_title)
-	savefile(urllib.quote_plus(cleaned_title)+'.strm',strm_contents,movie_folder)
-	if updatelibrary: xbmc.executebuiltin("XBMC.UpdateLibrary(video,"+movie_folder+")")
+	keyb = xbmc.Keyboard(cleaned_title, traducao(40053))
+	keyb.doModal()
+	if (keyb.isConfirmed()):
+		title = keyb.getText()
+		if title=='': sys.exit(0)
+	if type == 'movie': file_folder = os.path.join(moviesFolder,title)
+	elif type == 'tvshow': file_folder = os.path.join(tvshowFolder,title)
+	if not xbmcvfs.exists(file_folder): xbmcvfs.mkdir(file_folder)
+	strm_contents = 'plugin://plugin.video.abelhas/?url=' + url +'&mode=25&name=' + urllib.quote_plus(title)
+	savefile(urllib.quote_plus(title)+'.strm',strm_contents,file_folder)
+	if updatelibrary: xbmc.executebuiltin("XBMC.UpdateLibrary(video,"+file_folder+")")
 	else: return
 
 def play_from_outside(name,url):
@@ -707,6 +717,7 @@ def addCont(name,url,mode,tamanho,iconimage,total,pasta=False,atalhos=False):
 	contexto.append((traducao(40046), 'XBMC.RunPlugin(%s?mode=13&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
 	contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
 	contexto.append((traducao(40051), 'XBMC.RunPlugin(%s?mode=26&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+	contexto.append((traducao(40052), 'XBMC.RunPlugin(%s?mode=29&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))	
 	contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
 	if atalhos==False: contexto.append(('Adicionar atalho', 'RunPlugin(%s?mode=19&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
 	else: contexto.append(('Remover atalho', 'RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),atalhos)))
@@ -938,7 +949,8 @@ elif mode==22: pastas('/'.join(url.split('/')[:-1]),name)
 elif mode==23: pastas_de_fora(url,name)
 elif mode==24: proxpesquisa_mt()
 elif mode==25: play_from_outside(name,url)
-elif mode==26: add_to_library(name,url)
+elif mode==26: add_to_library(name,url,'movie')
 elif mode==27: proxpesquisa_lb()
 elif mode==28: proxpesquisa_tb()
+elif mode==29: add_to_library(name,url,'tvshow')
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

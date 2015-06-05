@@ -664,6 +664,10 @@ def legendas(moviefileid,url):
       return legendas
 
 def add_to_library(name,url,type,updatelibrary=True): 
+	episode = ''
+	tvshow = ''
+	season = ''
+	episode_name = ''
 	if type == 'movie': 
 		if not xbmcvfs.exists(moviesFolder): xbmcvfs.mkdir(moviesFolder)
 	elif type == 'tvshow': 
@@ -671,18 +675,67 @@ def add_to_library(name,url,type,updatelibrary=True):
 	name2 = re.compile('\[B\]\[COLOR .+?\](.+?)\[/COLOR\]\[/B\]').findall(name)
 	if name2: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name2[0][:-4])
 	else: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name[:-4])
-	keyb = xbmc.Keyboard(cleaned_title, traducao(40053))
-	keyb.doModal()
-	if (keyb.isConfirmed()):
-		title = keyb.getText()
-		if title=='': sys.exit(0)
+	if type == 'tvshow': tvshow,season,episode,episode_name = GetTVShowNameResolved(cleaned_title)
+	if (type == 'movie') or (type == 'tvshow' and tvshow == ''):
+		keyb = xbmc.Keyboard(cleaned_title, traducao(40053))
+		keyb.doModal()
+		if (keyb.isConfirmed()):
+			title = keyb.getText()
+			if title=='': sys.exit(0)
 	if type == 'movie': file_folder = os.path.join(moviesFolder,title)
-	elif type == 'tvshow': file_folder = os.path.join(tvshowFolder,title)
+	elif type == 'tvshow':
+		if tvshow <> '':
+			file_folder1 = os.path.join(tvshowFolder,tvshow)
+			if not xbmcvfs.exists(file_folder1): xbmcvfs.mkdir(file_folder1)
+			file_folder = os.path.join(os.path.join(tvshowFolder,tvshow),'S'+season)
+			title =  tvshow + ' S'+season+'E'+episode +' '+episode_name
+		else:
+			if title == '': title = cleaned_title
+			tvshow,season,episode,episode_name = GetTVShowNameResolved(title)
+			if tvshow <> '':
+				file_folder1 = os.path.join(tvshowFolder,tvshow)
+				if not xbmcvfs.exists(file_folder): xbmcvfs.mkdir(file_folder1)
+				file_folder = os.path.join(os.path.join(tvshowFolder,title),'S'+season)
+				title =  tvshow + ' S'+season+'E'+episode +' '+episode_name
+			else: file_folder = os.path.join(tvshowFolder,title)
 	if not xbmcvfs.exists(file_folder): xbmcvfs.mkdir(file_folder)
 	strm_contents = 'plugin://plugin.video.abelhas/?url=' + url +'&mode=25&name=' + urllib.quote_plus(title)
 	savefile(urllib.quote_plus(title)+'.strm',strm_contents,file_folder)
-	if updatelibrary: xbmc.executebuiltin("XBMC.UpdateLibrary(video,"+file_folder+")")
+	if updatelibrary: 
+		print file_folder1
+		if type == 'tvshow': xbmc.executebuiltin("XBMC.UpdateLibrary(video)")
+		elif type == 'movie': xbmc.executebuiltin("XBMC.UpdateLibrary(video,"+file_folder+")")
 	else: return
+
+def GetTVShowNameResolved(title):
+	episode = ''
+	tvshow = ''
+	season = ''
+	episode_name = ''
+	epi=re.compile('(.+?)[-. ][Ss](\d+)[EeXx.](\d+)[-. ](\w.+)').findall(title)
+	if not epi: 
+		print 'entrei aqui'
+		epi=re.compile('(.+?)[-. ](\d+)[EeXx.](\d+)[-. ](\w.+)').findall(title)
+	if epi:
+		print epi
+		for n,s,e,t in epi:
+			tvshow = n.strip()
+			season = s
+			if len(season) == 1 : season = '0'+season
+			episode = e
+			if len(episode) == 1 : episode = '0'+episode
+			episode_name = t.strip()
+	else:
+		epi=re.compile('(.+?)[Ss][-. ](\d+)[EeXx](\d+)').findall(title)
+		if not epi: epi=re.compile('(.+?)[-. ](\d+)[EeXx](\d+)').findall(title)
+		if epi:
+			for n,s,e in epi:
+				tvshow = n.strip()
+				season = s
+				if len(season) == 1 : season = '0'+season
+				episode = e
+				if len(episode) == 1 : episode = '0'+episode
+	return tvshow,season,episode,episode_name
 
 def play_from_outside(name,url):
 	login(True)

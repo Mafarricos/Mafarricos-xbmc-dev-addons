@@ -34,7 +34,6 @@ foldertype = int(selfAddon.getSetting('folder-type'))
 listURL = [MainURL, MinhaMainURL, lolaMainURL, toutMainURL]
 nameURL = ['Abelhas', 'Minhateca', 'Lolabits', 'Toutbox']
 usernameURL = [urllib.quote(selfAddon.getSetting('abelhas-username')), urllib.quote(selfAddon.getSetting('minhateca-username')), urllib.quote(selfAddon.getSetting('lolabits-username')), urllib.quote(selfAddon.getSetting('toutbox-username'))]
-MainPlayList = []
 
 #################################################### LOGIN ABELHAS #####################################################
 def login(defora=False):
@@ -71,8 +70,6 @@ def login(defora=False):
 
 ################################################### MENUS PLUGIN ######################################################
 def menu_principal(ligacao):
-	global MainPlayList
-	MainPlaylist = []
 	if ligacao==1:
 		addDir('[B][COLOR red]Addon em actualização/manutenção! Possíveis bugs.[/COLOR][/B]',MainURL,1,wtpath + art + 'pasta.png',1,True)
 		addDir(traducao(40007),MainURL,1,wtpath + art + 'pasta.png',1,True)
@@ -224,6 +221,7 @@ def atalhos(type=False):
                   xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
+	MainPlayList = []
 	if foldertype == 1 and re.search('action/SearchFiles',url) and not deFora:
 		source = xbmcgui.Dialog().select
 		selectlist = []
@@ -308,17 +306,15 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 		if reslist:
 			if deFora:
 				reslist = sorted(reslist, key=getKey,reverse=True)
-				#print reslist
 				analyzer(sitebase + reslist[1][1][4])
 			else:
 				if re.search('action/SearchFiles',url) and selfAddon.getSetting('search-order') == 'true': reslist = sorted(reslist, key=getKey,reverse=True)
-				global MainPlaylist
 				for part1,part2 in reslist: 
 					if foldertype == 1 and re.search('action/SearchFiles',url):
 						selectlist.append(part2[0])
 						urllist.append(part2[1])
 					else:
-						MainPlayList.append([part2[1],sitebase + part2[4]])
+						if '(video)' in part2[4] or '(audio)' in part2[4]: MainPlayList.append([part2[1],sitebase + part2[4]])
 						addCont('[B][COLOR '+part2[0]+']' + part2[1].replace(part2[2],'') + part2[2] + '[/COLOR][/B]' + '[COLOR white]' + part2[3] + '[/COLOR]',sitebase + part2[4],part2[5],part2[3],part2[6],len(reslist))
 				if foldertype == 1 and re.search('action/SearchFiles',url): 
 					choose=source('Link a Abrir',selectlist)
@@ -326,7 +322,7 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 				savefile('playlist.txt',str(MainPlayList))
 		if foldertype == 0 or (foldertype == 1 and not re.search('action/SearchFiles',url)) and not deFora: paginas(conteudo)
 	if foldertype == 0 or (foldertype == 1 and not re.search('action/SearchFiles',url)) and not deFora: xbmc.executebuiltin("Container.SetViewMode(51)")
-
+	
 #Mafarricos,sn - Novas alterações
 def returnExtra():
 	fileListSortType = 'Name'
@@ -359,6 +355,10 @@ def ReturnConteudo(conteudo,past,color,url2,deFora):
 		name = re.compile('title="(.+?)"', re.DOTALL).findall(part)
 		tituloficheiro = name[0][:-4]
 		extensao = name[0][-4:]
+		if '.' not in extensao:
+			tituloficheiro = name[0]
+			ext = re.compile('<span class="bold">.+?</span>(.+?)\s+</a>', re.DOTALL).findall(part)
+			extensao = ext[0]
 		url = re.compile('href="/(.+?)"', re.DOTALL).findall(part)
 		img = re.compile('<img src="(.+?)"', re.DOTALL).findall(part)
 		size = re.compile('<li><span>(.+?)</span></li>', re.DOTALL).findall(part)
@@ -416,7 +416,6 @@ def criarplaylist(url,name):
 	for titulo,url in playlistsearch: analyzer(url,subtitles='',playterm='playlist',playlistTitle=titulo)
 	xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
 	xbmcPlayer.play(playlist)
-	MainPlaylist = []
 	
 def trailer(name):
 	youtube_trailer_search = 'https://www.googleapis.com/youtube/v3/search?part=id,snippet&q=%s-Trailer&maxResults=1&key=AIzaSyCgpWUrGw2mySqmxxzlrsUoNhpGCBVJD7s'
@@ -662,6 +661,17 @@ def legendas(moviefileid,url):
       legendas=analyzer(url,subtitles='sim')
       return legendas
 
+def add_to_library_batch(type,updatelibrary=True):
+	print '#aki'
+	conteudo = openfile('playlist.txt')
+	playlistsearch=re.compile("\['(.+?)', '(.+?)'\]").findall(conteudo)
+	for titulo,url in playlistsearch: 
+		print titulo
+		add_to_library(titulo,url,type,False)
+	if updatelibrary: 
+		if type == 'tvshow': xbmc.executebuiltin("XBMC.UpdateLibrary(video)")
+		elif type == 'movie': xbmc.executebuiltin("XBMC.UpdateLibrary(video,"+file_folder+")")	
+
 def add_to_library(name,url,type,updatelibrary=True): 
 	episode = ''
 	tvshow = ''
@@ -712,10 +722,8 @@ def GetTVShowNameResolved(title):
 	episode_name = ''
 	epi=re.compile('(.+?)[-. ][Ss](\d+)[EeXx.](\d+)[-. ](\w.+)').findall(title)
 	if not epi: 
-		print 'entrei aqui'
 		epi=re.compile('(.+?)[-. ](\d+)[EeXx.](\d+)[-. ](\w.+)').findall(title)
 	if epi:
-		print epi
 		for n,s,e,t in epi:
 			tvshow = n.strip()
 			season = s
@@ -768,7 +776,9 @@ def addCont(name,url,mode,tamanho,iconimage,total,pasta=False,atalhos=False):
 	contexto.append((traducao(40046), 'XBMC.RunPlugin(%s?mode=13&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
 	contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
 	contexto.append((traducao(40051), 'XBMC.RunPlugin(%s?mode=26&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
-	contexto.append((traducao(40052), 'XBMC.RunPlugin(%s?mode=29&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))	
+	contexto.append((traducao(40052), 'XBMC.RunPlugin(%s?mode=29&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+	contexto.append((traducao(40051)+' - Batch', 'XBMC.RunPlugin(%s?mode=31&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+	contexto.append((traducao(40052)+' - Batch', 'XBMC.RunPlugin(%s?mode=30&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
 	contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
 	if atalhos==False: contexto.append(('Adicionar atalho', 'RunPlugin(%s?mode=19&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
 	else: contexto.append(('Remover atalho', 'RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),atalhos)))
@@ -834,8 +844,6 @@ class StopDownloading(Exception):
 
 ######################################################## OUTRAS FUNCOES ###############################################
 def caixadetexto(url,ftype=''):
-      global MainPlayList
-      MainPlayList = []
       ultpes=''
       save=False
       if url=='pastas' and re.search('Abelha',name): title="Ir para - Abelhas.pt"
@@ -1004,4 +1012,6 @@ elif mode==26: add_to_library(name,url,'movie')
 elif mode==27: proxpesquisa_lb()
 elif mode==28: proxpesquisa_tb()
 elif mode==29: add_to_library(name,url,'tvshow')
+elif mode==30: add_to_library_batch('tvshow')
+elif mode==31: add_to_library_batch('movie')
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

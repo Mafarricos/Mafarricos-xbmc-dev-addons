@@ -702,7 +702,6 @@ def add_to_library(name,url,type,updatelibrary=True):
 	strm_contents = 'plugin://plugin.video.abelhas/?url=' + url +'&mode=25&name=' + urllib.quote_plus(title)
 	savefile(urllib.quote_plus(title)+'.strm',strm_contents,file_folder)
 	if updatelibrary: 
-		print file_folder1
 		if type == 'tvshow': xbmc.executebuiltin("XBMC.UpdateLibrary(video)")
 		elif type == 'movie': xbmc.executebuiltin("XBMC.UpdateLibrary(video,"+file_folder+")")
 	else: return

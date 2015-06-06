@@ -356,14 +356,13 @@ def ReturnConteudo(conteudo,past,color,url2,deFora):
 	if not section: section = re.compile('<div class="filerow fileItemContainer">(.+?)</div></div>', re.DOTALL).findall(conteudo)
 	if not section: section = re.compile('<li class="fileItemContainer">(.+?)<li><span class="date">', re.DOTALL).findall(conteudo)
 	for part in section:
-		name = re.compile('<span class="bold">(.+?)</span>(.+?)\s+</a>', re.DOTALL).findall(part)
-		if not name: name = re.compile('<span class="bold">(.+?)</span>(.+?)</a>', re.DOTALL).findall(part)
+		name = re.compile('title="(.+?)"', re.DOTALL).findall(part)
+		tituloficheiro = name[0][:-4]
+		extensao = name[0][-4:]
 		url = re.compile('href="/(.+?)"', re.DOTALL).findall(part)
 		img = re.compile('<img src="(.+?)"', re.DOTALL).findall(part)
 		size = re.compile('<li><span>(.+?)</span></li>', re.DOTALL).findall(part)
 		if not size: size = re.compile('<li>\s+(.+?)\s+</li>', re.DOTALL).findall(part)
-		tituloficheiro = name[0][0]
-		extensao = name[0][1]
 		urlficheiro = url[0]
 		if not img: thumb = GetThumbExt(extensao)
 		else: thumb = img[0]

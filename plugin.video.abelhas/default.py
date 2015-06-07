@@ -901,8 +901,8 @@ def savefile(filename, contents,pastafinal=pastaperfil):
     except:
 		try:
 			destination = os.path.join(pastafinal,filename)
-			fh = xbmcvfs.File(destination, 'w', True)
-			fh.write(contents)
+			fh = xbmcvfs.File(destination, 'w')
+			fh.write(str(contents))
 			fh.close()
 		except: print "Nao gravou os temporarios de: %s | %s" % (filename,destination)
 

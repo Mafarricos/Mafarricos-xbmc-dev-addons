@@ -662,7 +662,6 @@ def legendas(moviefileid,url):
       return legendas
 
 def add_to_library_batch(type,updatelibrary=True):
-	print '#aki'
 	conteudo = openfile('playlist.txt')
 	playlistsearch=re.compile("\['(.+?)', '(.+?)'\]").findall(conteudo)
 	for titulo,url in playlistsearch: 
@@ -897,7 +896,13 @@ def savefile(filename, contents,pastafinal=pastaperfil):
         fh = open(destination, 'wb')
         fh.write(contents)  
         fh.close()
-    except: print "Nao gravou os temporarios de: %s" % filename
+    except:
+		try:
+			destination = os.path.join(pastafinal,filename)
+			fh = xbmcvfs.File(destination, 'w', True)
+			fh.write(contents)
+			fh.close()
+		except: print "Nao gravou os temporarios de: %s | %s" % (filename,destination)
 
 def openfile(filename,pastafinal=pastaperfil):
     try:

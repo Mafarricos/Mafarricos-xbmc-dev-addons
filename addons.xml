@@ -2,7 +2,7 @@
 <addons>
 <addon id="plugin.video.abelhas"
        name="Abelhas.pt e Clones"
-       version="1.0.2f"
+       version="1.0.2g"
        provider-name="fightnight/Mafarricos">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>

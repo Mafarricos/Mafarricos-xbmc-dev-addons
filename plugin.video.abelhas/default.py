@@ -679,7 +679,7 @@ def add_to_library(name,url,type,updatelibrary=True):
 		if not xbmcvfs.exists(tvshowFolder): xbmcvfs.mkdir(tvshowFolder)
 	name2 = re.compile('\[B\]\[COLOR .+?\](.+?)\[/COLOR\]\[/B\]').findall(name)
 	if name2: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name2[0][:-4])
-	else: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name[:-4])
+	else: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name)
 	if type == 'tvshow': tvshow,season,episode = GetTVShowNameResolved(cleaned_title)
 	if (type == 'movie') or (type == 'tvshow' and tvshow == ''):
 		keyb = xbmc.Keyboard(cleaned_title, traducao(40053))
@@ -715,9 +715,7 @@ def GetTVShowNameResolved(title):
 	episode = ''
 	tvshow = ''
 	season = ''
-	epi=re.compile('(.+?)[ .-][Ss](\d+)[EeXx.](\d+)').findall(title)
-	if not epi: 
-		epi=re.compile('(.+?)[ .-](\d+)[EeXx.](\d+)').findall(title)
+	epi=re.compile('(.+?)[ ]?[Ss]?(\d{1,2})[EeXx.](\d{1,2})').findall(title)
 	if epi:
 		for n,s,e in epi:
 			tvshow = n.strip().strip('-')

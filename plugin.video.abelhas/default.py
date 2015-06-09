@@ -715,12 +715,19 @@ def GetTVShowNameResolved(title):
 	episode = ''
 	tvshow = ''
 	season = ''
-	epi=re.compile('(.+?)[ ]?[Ss]?(\d{1,2})[EeXx.](\d{1,2})').findall(title)
+	epi = re.compile('(.+?)[ ]?[Ss]?(\d{1,2})[EeXx.](\d{1,2})').findall(title)
 	if epi:
 		for n,s,e in epi:
 			tvshow = n.strip().strip('-')
 			season = s
 			if len(season) == 1 : season = '0'+season
+			episode = e
+			if len(episode) == 1 : episode = '0'+episode
+	else: 
+		epi = re.compile('(.+?)[ \.]?Ep?(\d{1,3})').findall(title)
+		for n,e in epi:
+			tvshow = n.strip().strip('-')
+			season = '01'
 			episode = e
 			if len(episode) == 1 : episode = '0'+episode
 	return tvshow,season,episode

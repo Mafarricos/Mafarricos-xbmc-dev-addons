@@ -641,7 +641,11 @@ def comecarvideo(name,url,playterm,legendas=None):
 			if totalTime >= int(selfAddon.getSetting("minsize"))*60:
 				print '#pesquisar legendas'
 				from resources.lib import subtitles
-				legendas = subtitles.getsubtitles(name,selfAddon.getSetting("sublang1"),selfAddon.getSetting("sublang2"))
+				try: legendas = subtitles.getsubtitles(name,selfAddon.getSetting("sublang1"),selfAddon.getSetting("sublang2"))
+				except:
+					print '#error searching subtitles'
+					legendas = None
+					pass
 				if legendas!=None: xbmcPlayer.setSubtitles(legendas)
 	if playterm=='playlist': xbmc.executebuiltin("XBMC.Notification("+sitename+","+traducao(40039)+",'500000',"+iconpequeno.encode('utf-8')+")")
 

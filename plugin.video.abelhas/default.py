@@ -669,14 +669,17 @@ def add_to_library_batch(type,updatelibrary=True):
 	conteudo = openfile('playlist.txt')
 	playlistsearch=re.compile("\['(.+?)', '(.+?)'\]").findall(conteudo)
 	for titulo,url in playlistsearch: 
-		print titulo
 		add_to_library(titulo,url,type,False)
 	if updatelibrary: xbmc.executebuiltin("XBMC.UpdateLibrary(video)")
+
+def ReplaceSpecialChar(name):
+	return name.replace('ç','c').replace('À','A').replace('Á','A').replace('á','a').replace('à','a').replace('ã','a').replace('É','E').replace('é','e').replace('ê','e').replace('ó','o').replace('ô','o').replace('õ','o').replace('í','i')
 
 def add_to_library(name,url,type,updatelibrary=True): 
 	episode = ''
 	tvshow = ''
 	season = ''
+	name = ReplaceSpecialChar(name)
 	if type == 'movie': 
 		if not xbmcvfs.exists(moviesFolder): xbmcvfs.mkdir(moviesFolder)
 	elif type == 'tvshow': 
@@ -692,6 +695,7 @@ def add_to_library(name,url,type,updatelibrary=True):
 			title = keyb.getText()
 			if title=='': sys.exit(0)
 		else: sys.exit(0)
+	if title <> '': title = ReplaceSpecialChar(title)
 	if type == 'movie': 
 		try: file_folder = os.path.join(moviesFolder,title)
 		except: file_folder = os.path.join(moviesFolder,cleaned_title)

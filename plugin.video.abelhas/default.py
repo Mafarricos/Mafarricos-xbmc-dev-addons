@@ -606,6 +606,8 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
 		else: comecarvideo(name,linkfinal,playterm=playterm)
 
 def comecarvideo(name,url,playterm,legendas=None):
+	try: xbmc.Player().stop()
+	except: pass
 	if re.search('minhateca.com.br',url): sitename='Minhateca - '+name
 	elif re.search('lolabits',url): sitename='Lolabits - '+name	
 	else: sitename='Abelhas - '+name
@@ -618,8 +620,27 @@ def comecarvideo(name,url,playterm,legendas=None):
 	if not playterm and playeractivo==0: playlist.clear()
 	listitem = xbmcgui.ListItem(path=url)
 	title='%s' % (name.split('[/B]')[0].replace('[B]',''))
-	listitem.setInfo("Video", {"Title":title})
-	listitem.setInfo("Music", {"Title":title})
+	try:
+		tv = xbmc.getInfoLabel('ListItem.Art(tvshow.poster)')
+		if tv == "": content = 'movie'
+		else: content = 'episode'
+	
+		if content == 'movie':
+			meta = {'title': xbmc.getInfoLabel('ListItem.title'), 'originaltitle': xbmc.getInfoLabel('ListItem.originaltitle'), 'year': xbmc.getInfoLabel('ListItem.year'), 'genre': xbmc.getInfoLabel('ListItem.genre'), 'studio' : xbmc.getInfoLabel('ListItem.studio'), 'country' : xbmc.getInfoLabel('ListItem.country'), 'duration' : xbmc.getInfoLabel('ListItem.duration'), 'rating': xbmc.getInfoLabel('ListItem.rating'), 'votes': xbmc.getInfoLabel('ListItem.votes'), 'mpaa': xbmc.getInfoLabel('ListItem.mpaa'), 'director': xbmc.getInfoLabel('ListItem.director'), 'writer': xbmc.getInfoLabel('ListItem.writer'), 'plot': xbmc.getInfoLabel('ListItem.plot'), 'plotoutline': xbmc.getInfoLabel('ListItem.plotoutline'), 'tagline': xbmc.getInfoLabel('ListItem.tagline')}
+			label, poster, thumb, fanart = xbmc.getInfoLabel('ListItem.label'), xbmc.getInfoLabel('ListItem.icon'), xbmc.getInfoLabel('ListItem.icon'), xbmc.getInfoLabel('ListItem.Property(Fanart_Image)')
+	        
+		elif content == 'episode':
+			meta = {'title': xbmc.getInfoLabel('ListItem.title'), 'season' : xbmc.getInfoLabel('ListItem.season'), 'episode': xbmc.getInfoLabel('ListItem.episode'), 'tvshowtitle': xbmc.getInfoLabel('ListItem.tvshowtitle'), 'studio': xbmc.getInfoLabel('ListItem.studio'), 'premiered' : xbmc.getInfoLabel('ListItem.premiered'), 'duration' : xbmc.getInfoLabel('ListItem.duration'), 'rating': xbmc.getInfoLabel('ListItem.rating'), 'mpaa' : xbmc.getInfoLabel('ListItem.mpaa'), 'director': xbmc.getInfoLabel('ListItem.director'), 'writer': xbmc.getInfoLabel('ListItem.writer'), 'plot': xbmc.getInfoLabel('ListItem.plot')}
+			label, poster, thumb, fanart = xbmc.getInfoLabel('ListItem.label'), xbmc.getInfoLabel('ListItem.Art(tvshow.poster)'), xbmc.getInfoLabel('ListItem.icon'), xbmc.getInfoLabel('ListItem.Property(Fanart_Image)')
+	
+		listitem = xbmcgui.ListItem(label, iconImage="DefaultVideo.png", thumbnailImage=thumb)
+		try: listitem.setArt({'poster': poster, 'tvshow.poster': poster, 'season.poster': poster})
+		except: pass
+	except:
+		listitem.setInfo("Video", {"Title":title})
+		listitem.setInfo("Music", {"Title":title})
+	listitem.setProperty("Fanart_Image", fanart)
+ 	listitem.setInfo(type="Video", infoLabels = meta)
 	listitem.setProperty('mimetype', 'video/x-msvideo')
 	listitem.setProperty('IsPlayable', 'true')
 	xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
@@ -631,7 +652,7 @@ def comecarvideo(name,url,playterm,legendas=None):
 		  dialogWait.close()
 		  del dialogWait
 	xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
-	if not playterm and playeractivo==0: xbmcPlayer.play(playlist)
+	if not playterm and playeractivo==0: xbmcPlayer.play(playlist, listitem)
 	if legendas!=None: xbmcPlayer.setSubtitles(legendas)
 	else:
 		if selfAddon.getSetting("subtitles") == 'true': 

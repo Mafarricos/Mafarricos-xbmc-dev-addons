@@ -700,6 +700,7 @@ def add_to_library(name,url,type,updatelibrary=True):
 	episode = ''
 	tvshow = ''
 	season = ''
+	title = ''
 	name = ReplaceSpecialChar(name)
 	if type == 'movie': 
 		if not xbmcvfs.exists(moviesFolder): xbmcvfs.mkdir(moviesFolder)

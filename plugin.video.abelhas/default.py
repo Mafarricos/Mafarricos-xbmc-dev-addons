@@ -717,6 +717,7 @@ def add_to_library(name,url,type,updatelibrary=True):
 			title = keyb.getText()
 			if title=='': sys.exit(0)
 		else: sys.exit(0)
+	if title <> '': title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ', ReplaceSpecialChar(title))
 	if type == 'movie': 
 		try: file_folder = os.path.join(moviesFolder,title)
 		except: file_folder = os.path.join(moviesFolder,cleaned_title)

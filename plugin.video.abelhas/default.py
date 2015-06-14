@@ -71,7 +71,6 @@ def login(defora=False):
 ################################################### MENUS PLUGIN ######################################################
 def menu_principal(ligacao):
 	if ligacao==1:
-		addDir('[B][COLOR red]Addon em actualização/manutenção! Possíveis bugs.[/COLOR][/B]',MainURL,1,wtpath + art + 'pasta.png',1,True)
 		addDir(traducao(40007),MainURL,1,wtpath + art + 'pasta.png',1,True)
 		addDir('Mais Recentes',MainURL,2,wtpath + art + 'pasta.png',2,True)
 		for x in range(0, len(listURL)):
@@ -222,7 +221,7 @@ def atalhos(type=False):
 
 def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 	MainPlayList = []
-	if foldertype == 1 and re.search('action/SearchFiles',url) and not deFora:
+	if foldertype == 1 and re.search('action/SearchFiles',url):
 		source = xbmcgui.Dialog().select
 		selectlist = []
 		urllist = []
@@ -305,8 +304,17 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 		reslist = ReturnConteudo(conteudo,past,color,url,deFora)
 		if reslist:
 			if deFora:
-				reslist = sorted(reslist, key=getKey,reverse=True)
-				analyzer(sitebase + reslist[1][1][4])
+				if foldertype == 1:
+					if selfAddon.getSetting('search-order') == 'true': reslist = sorted(reslist, key=getKey,reverse=True)
+					print reslist
+					for part1,part2 in reslist:
+						selectlist.append(part2[1]+part2[2]+part2[3])
+						urllist.append(sitebase + part2[4])
+					choose=source('Link a Abrir',selectlist)
+					if choose > -1:	analyzer(urllist[choose])
+				else:
+					reslist = sorted(reslist, key=getKey,reverse=True)
+					analyzer(sitebase + reslist[1][1][4])
 			else:
 				if re.search('action/SearchFiles',url) and selfAddon.getSetting('search-order') == 'true': reslist = sorted(reslist, key=getKey,reverse=True)
 				for part1,part2 in reslist: 

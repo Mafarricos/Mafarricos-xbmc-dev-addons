@@ -1,3 +1,21 @@
+[B]v1.1.0-beta001 (14 de Junho de 2015):[/B]
+- Melhoria quando addon chamado de fora:
+- Se opção Pasta no addon abre logo o video (com melhor qualidade dependendo das opções);
+- Se opção Dialogo dá opção de escolher a qualidade.
+
+[B]v1.1.0 (14 de Junho de 2015):[/B]
+Actualizacao por Mafarricos!
+- Thumbnails do abelhas para filmes e fotos;
+- Código refeito;
+- Toutbox, lolabits e minhateca adicionados;
+- Adição à biblioteca;
+- Trailer actualizado com a nova api do youtube;
+- Criar playlist refeita;
+- Play de fora refeito (integração mais simples);
+- Opções de pesquisar ordenando por tamanho;
+- Pesquisa com valor minimo e máximo de MB;
+- Opções de ordenar o conteudo das pastas como no abelhas.
+
 [B]v1.0.1 (5 de Abril de 2015):[/B]
 Addon em actualizacao.
 - Fix criar playlist (tks Leinad4Mind).

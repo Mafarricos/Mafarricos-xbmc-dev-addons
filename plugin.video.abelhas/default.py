@@ -221,6 +221,7 @@ def atalhos(type=False):
 
 def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 	MainPlayList = []
+	uniqueList = []
 	if foldertype == 1 and re.search('action/SearchFiles',url):
 		source = xbmcgui.Dialog().select
 		selectlist = []
@@ -306,10 +307,11 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 			if deFora:
 				if foldertype == 1:
 					if selfAddon.getSetting('search-order') == 'true': reslist = sorted(reslist, key=getKey,reverse=True)
-					print reslist
 					for part1,part2 in reslist:
-						selectlist.append(part2[1]+part2[2]+part2[3])
-						urllist.append(sitebase + part2[4])
+						if not part2[1]+part2[2]+part2[3] in uniqueList:
+							uniqueList.append(part2[1]+part2[2]+part2[3])
+							selectlist.append(part2[1]+part2[2]+part2[3])
+							urllist.append(sitebase + part2[4])
 					choose=source('Link a Abrir',selectlist)
 					if choose > -1:	analyzer(urllist[choose])
 				else:
@@ -319,11 +321,15 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 				if re.search('action/SearchFiles',url) and selfAddon.getSetting('search-order') == 'true': reslist = sorted(reslist, key=getKey,reverse=True)
 				for part1,part2 in reslist: 
 					if foldertype == 1 and re.search('action/SearchFiles',url):
-						selectlist.append(part2[0])
-						urllist.append(part2[1])
+						if not part2[0] in uniqueList:
+							uniqueList.append(part2[0])
+							selectlist.append(part2[0])
+							urllist.append(part2[1])
 					else:
-						if '(video)' in part2[4] or '(audio)' in part2[4]: MainPlayList.append([part2[1],sitebase + part2[4]])
-						addCont('[B][COLOR '+part2[0]+']' + part2[1].replace(part2[2],'') + part2[2] + '[/COLOR][/B]' + '[COLOR white]' + part2[3] + '[/COLOR]',sitebase + part2[4],part2[5],part2[3],part2[6],len(reslist))
+						if not (part2[1].replace(part2[2],'') + part2[2] + part2[3]) in uniqueList:
+							if '(video)' in part2[4] or '(audio)' in part2[4]: MainPlayList.append([part2[1],sitebase + part2[4]])
+							uniqueList.append(part2[1].replace(part2[2],'') + part2[2] + part2[3])
+							addCont('[B][COLOR '+part2[0]+']' + part2[1].replace(part2[2],'') + part2[2] + '[/COLOR][/B]' + '[COLOR white]' + part2[3] + '[/COLOR]',sitebase + part2[4],part2[5],part2[3],part2[6],len(reslist))
 				if foldertype == 1 and re.search('action/SearchFiles',url): 
 					choose=source('Link a Abrir',selectlist)
 					if choose > -1:	analyzer(urllist[choose])
@@ -378,7 +384,7 @@ def ReturnConteudo(conteudo,past,color,url2,deFora):
 		tamanhoficheiro=tamanhoficheiro.replace(' ','')
 		tamanhoparavariavel=' (' + tamanhoficheiro + ')'
 		if deFora: reslist = SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,4,thumb,reslist)
-		elif foldertype == 1 and re.search('action/SearchFiles',url2): reslist = SearchResultsFora(tamanhoficheiro,'[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,color,reslist)
+		elif foldertype == 1 and re.search('action/SearchFiles',url2): reslist = SearchResultsFora(tamanhoficheiro,tituloficheiro+extensao+tamanhoparavariavel,MainURL + urlficheiro,color,reslist)
 		else: reslist = SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,4,thumb,reslist)
 	return reslist
 

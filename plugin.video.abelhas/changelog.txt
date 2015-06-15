@@ -1,3 +1,6 @@
+[B]v1.1.0-beta003 (15 de Junho de 2015):[/B]
+- Opção de resumir.
+
 [B]v1.1.0-beta002 (15 de Junho de 2015):[/B]
 - Pesquisa apresenta resultados únicos na combinação de nome+tamanho.
 

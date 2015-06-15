@@ -5,6 +5,7 @@
 
 import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time,xbmcvfs
 from t0mm0.common.net import Net
+from resources.lib import internalPlayer
 net=Net()
 
 ####################################################### CONSTANTES #####################################################
@@ -664,13 +665,13 @@ def comecarvideo(name,url,playterm,legendas=None):
 	playlist.add(url, listitem)
 	if playterm <> 'playlist':		
 		  dialogWait.close()
-		  del dialogWait
-	xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+		  del dialogWait	  
+	xbmcPlayer = internalPlayer.Player(title=title)
 	if not playterm and playeractivo==0: xbmcPlayer.play(playlist, listitem)
 	if legendas!=None: xbmcPlayer.setSubtitles(legendas)
 	else:
 		if selfAddon.getSetting("subtitles") == 'true': 
-			try: totalTime = xbmc.Player().getTotalTime()
+			try: totalTime = xbmcPlayer.getTotalTime()
 			except: totalTime = 0
 			print '##totaltime',totalTime
 			if totalTime >= int(selfAddon.getSetting("minsize"))*60:
@@ -682,6 +683,10 @@ def comecarvideo(name,url,playterm,legendas=None):
 					legendas = None
 					pass
 				if legendas!=None: xbmcPlayer.setSubtitles(legendas)
+	if selfAddon.getSetting('track-player')=='true' and not playterm:
+		while xbmcPlayer.playing:
+			xbmc.sleep(5000)
+			xbmcPlayer.track_time()
 	if playterm=='playlist': xbmc.executebuiltin("XBMC.Notification("+sitename+","+traducao(40039)+",'500000',"+iconpequeno.encode('utf-8')+")")
 
 def limparplaylist():

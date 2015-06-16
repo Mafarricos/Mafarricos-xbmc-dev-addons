@@ -9,16 +9,17 @@ addon_id = 'plugin.video.abelhas'
 selfAddon = xbmcaddon.Addon(id=addon_id)
 datapath = xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-8')
 track = selfAddon.getSetting('track-player')
-extension = ['avi','mkv','mpeg','mpg','wmv','mp4','divx']
 
 class Player(xbmc.Player):
 	def __init__(self,title):
 		xbmc.Player.__init__(self)
-		self.title=re.compile("\[COLOR .+?\](.+?)\[/COLOR\]").findall(title)[0]
+		print title
+		try: self.title=re.sub('[^-a-zA-Z0-9_\.()\\\/ ]+', ' ',  re.compile("\[COLOR .+?\](.+?)\[/COLOR\]").findall(title)[0])
+		except: self.title=re.sub('[^-a-zA-Z0-9_\.()\\\/ ]+', ' ',  title)
 		self.playing = True
 		self.time = 0
 		self.totalTime = 0
-		if track == 'true' and self.title[-3:] in extension:
+		if track == 'true':
 			try: self.id = self.title
 			except: self.id = None
 			if not xbmcvfs.exists(os.path.join(datapath,'trackplayer')): xbmcvfs.mkdir(os.path.join(datapath,'trackplayer'))
@@ -29,7 +30,7 @@ class Player(xbmc.Player):
 		print 'player Start'
 		self.totalTime = self.getTotalTime()
 		print 'total time',self.totalTime
-		if track == 'true' and self.title[-3:] in extension:
+		if track == 'true' and self.isPlayingVideo():
 			if xbmcvfs.exists(self.filemedia):
 				print "Existe um bookmark de visualizacao anterior..."
 				tracker=readfile(self.filemedia)
@@ -42,7 +43,7 @@ class Player(xbmc.Player):
 		time = int(self.time)
 		print 'self.time/self.totalTime='+str(self.time/self.totalTime)
 		if (self.time/self.totalTime > 0.90):
-			if track == 'true' and title[-3:] in extension:
+			if track == 'true' and self.isPlayingVideo():
 				try: xbmcvfs.delete(self.filemedia)
 				except: pass
 
@@ -51,7 +52,7 @@ class Player(xbmc.Player):
 
 	def track_time(self):
 		try:
-			if track == 'true' and self.title[-3:] in extension:
+			if track == 'true' and self.isPlayingVideo():
 				self.time = self.getTime()
 				save(self.filemedia,str(self.time))
 		except: pass

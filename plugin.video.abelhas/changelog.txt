@@ -1,3 +1,7 @@
+[B]v1.1.0-beta006 (18 de Junho de 2015):[/B]
+- mark as watched from library list: ty gb160
+- fix favorite next page
+
 [B]v1.1.0-beta005 (18 de Junho de 2015):[/B]
 abelhas improvement: better usage of portuguese chars
 

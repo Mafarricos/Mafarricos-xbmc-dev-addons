@@ -124,7 +124,7 @@ def favoritos():
 		chomikid=re.compile('<input id="FriendsTargetChomikName" name="FriendsTargetChomikName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
 		token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
 		if name==traducao(40037):pagina=1
-		else: pagina=int(name.replace("[COLOR "+color[x]+"]Página ",'').replace(' >>>[/COLOR]',''))
+		else: pagina = re.compile('\[.+?\].+? (\d) .+?').findall(name)[0]
 		form_d = {'page':pagina,'chomikName':chomikid,'__RequestVerificationToken':token}
 		ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':site[x].replace('http://','').replace('/',''),'Origin':site[x],'Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
 		endlogin=site[x] + 'action/Friends/ShowAllFriends'

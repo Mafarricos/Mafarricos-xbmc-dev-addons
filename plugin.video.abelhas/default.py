@@ -329,7 +329,7 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 							urllist.append(part2[1])
 					else:
 						if not (part2[1].replace(part2[2],'') + part2[2] + part2[3]) in uniqueList:
-							if '(video)' in part2[4] or '(audio)' in part2[4]: MainPlayList.append([part2[1],sitebase + part2[4]])
+							if '(video)' in part2[4] or '(audio)' in part2[4]: MainPlayList.append([ReplaceSpecialChar(part2[1]),sitebase + part2[4]])
 							uniqueList.append(part2[1].replace(part2[2],'') + part2[2] + part2[3])
 							addCont('[B][COLOR '+part2[0]+']' + part2[1].replace(part2[2],'') + part2[2] + '[/COLOR][/B]' + '[COLOR white]' + part2[3] + '[/COLOR]',sitebase + part2[4],part2[5],part2[3],part2[6],len(reslist))
 				if foldertype == 1 and re.search('action/SearchFiles',url): 

@@ -14,6 +14,12 @@ class Player(xbmc.Player):
 	def __init__(self,title):
 		xbmc.Player.__init__(self)
 		print title
+
+		self.dbid = xbmc.getInfoLabel('ListItem.DBID')
+		tv = xbmc.getInfoLabel('ListItem.Art(tvshow.poster)')
+		if tv == "": self.vidcontent = 'movie'
+		else: self.vidcontent = 'episode'
+
 		try: self.title=re.sub('[^-a-zA-Z0-9_\.()\\\/ ]+', ' ',  re.compile("\[COLOR .+?\](.+?)\[/COLOR\]").findall(title)[0])
 		except: self.title=re.sub('[^-a-zA-Z0-9_\.()\\\/ ]+', ' ',  title)
 		self.playing = True
@@ -27,15 +33,16 @@ class Player(xbmc.Player):
 			else: self.filemedia = None
 
 	def onPlayBackStarted(self):
-		print 'player Start'
-		self.totalTime = self.getTotalTime()
-		print 'total time',self.totalTime
-		if track == 'true' and self.isPlayingVideo():
-			if xbmcvfs.exists(self.filemedia):
-				print "Existe um bookmark de visualizacao anterior..."
-				tracker=readfile(self.filemedia)
-				opcao=xbmcgui.Dialog().yesno("Abelhas", 'Existe um registo de visualização anterior.','Continuar a partir de '+ ' %s?' % (format_time(float(tracker))),'', 'Não', 'Sim')
-				if opcao: self.seekTime(float(tracker))
+		try:
+			self.totalTime = self.getTotalTime()
+			print 'total time',self.totalTime
+			if track == 'true' and self.isPlayingVideo():
+				if xbmcvfs.exists(self.filemedia):
+					print "Resume point available..."
+					tracker=readfile(self.filemedia)
+					opcao=xbmcgui.Dialog().yesno("Abelhas", 'Resume point available.','Continue from '+ ' %s?' % (format_time(float(tracker))),'', 'No', 'Yes')
+					if opcao: self.seekTime(float(tracker))
+		except: pass
 
 	def onPlayBackStopped(self):
 		print 'player Stop'
@@ -43,12 +50,19 @@ class Player(xbmc.Player):
 		time = int(self.time)
 		print 'self.time/self.totalTime='+str(self.time/self.totalTime)
 		if (self.time/self.totalTime > 0.90):
+			self.onPlayBackEnded()
 			if track == 'true' and self.isPlayingVideo():
 				try: xbmcvfs.delete(self.filemedia)
 				except: pass
 
 	def onPlayBackEnded(self):
-		self.onPlayBackStopped()
+		if str(self.vidcontent) == 'episode':
+			print "Marking Episode as watched"
+			xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(self.dbid))
+		elif str(self.vidcontent) == 'movie':
+			print "Marking Movie as watched"
+			xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % str(self.dbid))
+		xbmc.executebuiltin('Container.Refresh')
 
 	def track_time(self):
 		try:

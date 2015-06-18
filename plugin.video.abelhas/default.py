@@ -3,9 +3,10 @@
 """ abelhas.pt
     2015 fightnight"""
 
-import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time,xbmcvfs
+import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time,xbmcvfs,HTMLParser
 from t0mm0.common.net import Net
 from resources.lib import internalPlayer
+h = HTMLParser.HTMLParser()
 net=Net()
 
 ####################################################### CONSTANTES #####################################################
@@ -368,10 +369,10 @@ def ReturnConteudo(conteudo,past,color,url2,deFora):
 	if not section: section = re.compile('<li class="fileItemContainer">(.+?)<li><span class="date">', re.DOTALL).findall(conteudo)
 	for part in section:
 		name = re.compile('title="(.+?)"', re.DOTALL).findall(part)
-		tituloficheiro = name[0][:-4]
+		tituloficheiro = h.unescape(name[0][:-4])
 		extensao = name[0][-4:]
 		if '.' not in extensao:
-			tituloficheiro = name[0]
+			tituloficheiro = h.unescape(name[0])
 			ext = re.compile('<span class="bold">.+?</span>(.+?)\s+</a>', re.DOTALL).findall(part)
 			extensao = ext[0]
 		url = re.compile('href="/(.+?)"', re.DOTALL).findall(part)
@@ -713,6 +714,8 @@ def add_to_library_batch(type,updatelibrary=True):
 	if updatelibrary: xbmc.executebuiltin("XBMC.UpdateLibrary(video)")
 
 def ReplaceSpecialChar(name):
+	try: name = name.encode('utf-8')
+	except: pass
 	return name.replace('ç','c').replace('À','A').replace('Á','A').replace('á','a').replace('à','a').replace('ã','a').replace('É','E').replace('é','e').replace('ê','e').replace('ó','o').replace('ô','o').replace('õ','o').replace('í','i')
 
 def add_to_library(name,url,type,updatelibrary=True): 
@@ -720,14 +723,17 @@ def add_to_library(name,url,type,updatelibrary=True):
 	tvshow = ''
 	season = ''
 	title = ''
-	name = ReplaceSpecialChar(name)
+	name2 = re.compile('\[B\]\[COLOR .+?\](.+?)\[/COLOR\]\[/B\]').findall(name)
+	if name2: 
+		name = ReplaceSpecialChar(h.unescape(name2[0]))
+		cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name[:-4])
+	else:
+		name = ReplaceSpecialChar(h.unescape(name))
+		cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name)
 	if type == 'movie': 
 		if not xbmcvfs.exists(moviesFolder): xbmcvfs.mkdir(moviesFolder)
 	elif type == 'tvshow': 
 		if not xbmcvfs.exists(tvshowFolder): xbmcvfs.mkdir(tvshowFolder)
-	name2 = re.compile('\[B\]\[COLOR .+?\](.+?)\[/COLOR\]\[/B\]').findall(name)
-	if name2: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name2[0][:-4])
-	else: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name)
 	if type == 'tvshow': tvshow,season,episode = GetTVShowNameResolved(cleaned_title)
 	if (type == 'movie') or (type == 'tvshow' and tvshow == ''):
 		keyb = xbmc.Keyboard(cleaned_title, traducao(40053))
@@ -807,6 +813,8 @@ def addDir(name,url,mode,iconimage,total,pasta,atalhos=False):
 
 def addCont(name,url,mode,tamanho,iconimage,total,pasta=False,atalhos=False):
 	contexto=[]
+	try: name = name.encode('ascii', 'xmlcharrefreplace')
+	except: pass
 	u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&tamanhof="+urllib.quote_plus(tamanho)
 	liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
 	contexto.append((traducao(40038), 'XBMC.RunPlugin(%s?mode=10&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))

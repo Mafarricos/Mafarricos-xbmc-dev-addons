@@ -622,8 +622,9 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
 		else: comecarvideo(name,linkfinal,playterm=playterm)
 
 def comecarvideo(name,url,playterm,legendas=None):
-	try: xbmc.Player().stop()
-	except: pass
+	if not playterm:
+		try: xbmc.Player().stop()
+		except: pass
 	if re.search('minhateca.com.br',url): sitename='Minhateca - '+name
 	elif re.search('lolabits',url): sitename='Lolabits - '+name	
 	elif re.search('toutbox',url): sitename='Toutbox - '+name		

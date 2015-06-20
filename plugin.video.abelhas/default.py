@@ -32,6 +32,7 @@ username_lb = urllib.quote(selfAddon.getSetting('lolabits-username'))
 username_tb = urllib.quote(selfAddon.getSetting('toutbox-username'))
 moviesFolder = xbmc.translatePath(selfAddon.getSetting('libraryfolder'))
 tvshowFolder = xbmc.translatePath(selfAddon.getSetting('tvshowlibraryfolder'))
+musicvideoFolder = xbmc.translatePath(selfAddon.getSetting('musicvideolibraryfolder'))
 foldertype = int(selfAddon.getSetting('folder-type'))
 listURL = [MainURL, MinhaMainURL, lolaMainURL, toutMainURL]
 nameURL = ['Abelhas', 'Minhateca', 'Lolabits', 'Toutbox']
@@ -741,8 +742,10 @@ def add_to_library(name,url,type,updatelibrary=True):
 		if not xbmcvfs.exists(moviesFolder): xbmcvfs.mkdir(moviesFolder)
 	elif type == 'tvshow': 
 		if not xbmcvfs.exists(tvshowFolder): xbmcvfs.mkdir(tvshowFolder)
+	elif type == 'musicvideo':
+		if not xbmcvfs.exists(musicvideoFolder): xbmcvfs.mkdir(musicvideoFolder)
 	if type == 'tvshow': tvshow,season,episode = GetTVShowNameResolved(cleaned_title)
-	if (type == 'movie') or (type == 'tvshow' and tvshow == ''):
+	if (type == 'movie') or (type == 'musicvideo') or (type == 'tvshow' and tvshow == ''):
 		keyb = xbmc.Keyboard(cleaned_title, traducao(40053))
 		keyb.doModal()
 		if (keyb.isConfirmed()):
@@ -768,6 +771,7 @@ def add_to_library(name,url,type,updatelibrary=True):
 				file_folder = os.path.join(os.path.join(tvshowFolder,title),'S'+season)
 				title =  tvshow + ' S'+season+'E'+episode
 			else: file_folder = os.path.join(tvshowFolder,title)
+	elif type == 'musicvideo': file_folder = musicvideoFolder
 	if not xbmcvfs.exists(file_folder): xbmcvfs.mkdir(file_folder)
 	strm_contents = 'plugin://plugin.video.abelhas/?url=' + url +'&mode=25&name=' + urllib.quote_plus(title)
 	savefile(urllib.quote_plus(title)+'.strm',strm_contents,file_folder)
@@ -830,8 +834,10 @@ def addCont(name,url,mode,tamanho,iconimage,total,pasta=False,atalhos=False):
 	contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
 	contexto.append((traducao(40051), 'XBMC.RunPlugin(%s?mode=26&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
 	contexto.append((traducao(40052), 'XBMC.RunPlugin(%s?mode=29&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
+	contexto.append((traducao(40054), 'XBMC.RunPlugin(%s?mode=32&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
 	contexto.append((traducao(40051)+' - Batch', 'XBMC.RunPlugin(%s?mode=31&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
 	contexto.append((traducao(40052)+' - Batch', 'XBMC.RunPlugin(%s?mode=30&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
+	contexto.append((traducao(40054)+' - Batch', 'XBMC.RunPlugin(%s?mode=33&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
 	contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
 	if atalhos==False: contexto.append(('Adicionar atalho', 'RunPlugin(%s?mode=19&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
 	else: contexto.append(('Remover atalho', 'RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),atalhos)))
@@ -1073,4 +1079,6 @@ elif mode==28: proxpesquisa_tb()
 elif mode==29: add_to_library(name,url,'tvshow')
 elif mode==30: add_to_library_batch('tvshow')
 elif mode==31: add_to_library_batch('movie')
+elif mode==32: add_to_library(name,url,'musicvideo')
+elif mode==33: add_to_library_batch('musicvideo')
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

@@ -72,26 +72,22 @@ class Player(xbmc.Player):
 		except: pass
 
 def save(filename, contents):
-    try:
-        fh = open(filename, 'wb')
-        fh.write(contents)  
-        fh.close()
-    except:
-		try:
-			fh = xbmcvfs.File(filename, 'w')
-			fh.write(str(contents))
-			fh.close()
-		except: print "Nao gravou os temporarios de: %s" % (filename)
+	try:
+		fh = xbmcvfs.File(filename, 'w')
+		fh.write(str(contents))
+		fh.close()
+	except: print "Nao gravou os temporarios de: %s" % (filename)
 
 def readfile(filename):
     try:
-        f = open(filename, "r")
-        string = f.read()
-        return string
+		fh = xbmcvfs.File(filename)
+		string = fh.read()
+		fh.close()
+		return string
     except:
-        traceback.print_exc()
-        print "Nao abriu conteudos de: %s" % filename
-        return None
+		traceback.print_exc()
+		print "Nao abriu conteudos de: %s" % filename
+		return None
 
 def format_time(seconds):
     minutes,seconds = divmod(seconds, 60)

@@ -951,29 +951,24 @@ def abrir_url(url):
       return link
 
 def savefile(filename, contents,pastafinal=pastaperfil):
-    try:
-        destination = os.path.join(pastafinal,filename)
-        fh = open(destination, 'wb')
-        fh.write(contents)  
-        fh.close()
-    except:
-		try:
-			destination = os.path.join(pastafinal,filename)
-			fh = xbmcvfs.File(destination, 'w')
-			fh.write(str(contents))
-			fh.close()
-		except: print "Nao gravou os temporarios de: %s | %s" % (filename,destination)
+	try:
+		destination = os.path.join(pastafinal,filename)
+		fh = xbmcvfs.File(destination, 'w')
+		fh.write(str(contents))
+		fh.close()
+	except: print "Nao gravou os temporarios de: %s | %s" % (filename,destination)
 
 def openfile(filename,pastafinal=pastaperfil):
     try:
-        destination = os.path.join(pastafinal, filename)
-        fh = open(destination, 'rb')
-        contents=fh.read()
-        fh.close()
-        return contents
+		destination = os.path.join(pastafinal, filename)
+		fh = xbmcvfs.File(destination)
+		contents = fh.read()
+		fh.close()
+		return contents
     except:
-        print "Nao abriu os temporarios de: %s" % filename
-        return None
+		traceback.print_exc()
+		print "Nao abriu conteudos de: %s" % filename
+		return None
 
 def abrir_url_cookie(url,erro=True):
       net.set_cookies(cookies)

@@ -7,7 +7,7 @@ import xbmc,xbmcaddon,xbmcgui,os,xbmcvfs,re
 
 addon_id = 'plugin.video.abelhas'
 selfAddon = xbmcaddon.Addon(id=addon_id)
-datapath = xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-8')
+datapath = xbmc.translatePath(selfAddon.getSetting('resumefolder'))
 track = selfAddon.getSetting('track-player')
 
 class Player(xbmc.Player):
@@ -28,8 +28,8 @@ class Player(xbmc.Player):
 		if track == 'true':
 			try: self.id = self.title
 			except: self.id = None
-			if not xbmcvfs.exists(os.path.join(datapath,'trackplayer')): xbmcvfs.mkdir(os.path.join(datapath,'trackplayer'))
-			if self.id: self.filemedia = os.path.join(datapath,'trackplayer',str(self.id)+'.txt')
+			if not xbmcvfs.exists(datapath): xbmcvfs.mkdir(datapath)
+			if self.id: self.filemedia = os.path.join(datapath,str(self.id)+'.txt')
 			else: self.filemedia = None
 
 	def onPlayBackStarted(self):

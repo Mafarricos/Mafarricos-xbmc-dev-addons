@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-	<category label="Geral">
-		<setting label="Logins" type="lsep" />
+	<category label="Logins">
 		<setting id="abelhas-enable" type="bool" label="Activar abelhas.pt" default="false"/>
 		<setting id="abelhas-username" type="text" label="Username abelhas.pt" default="" visible="!eq(-1,false)"/>
 		<setting id="abelhas-password" type="text" label="Password abelhas.pt" default="" option="hidden" visible="!eq(-2,false)"/>
@@ -30,7 +29,9 @@
 		<setting id="ultima-pesquisa" type="text" label="Ultima pesquisa" default="" visible="false"/>
 		<setting type="sep"/>
 		<setting id="track-player" type="bool" label="30149" default="true"/>
-		<setting type="sep"/>
+		<setting id="resumefolder" type="folder" label="30151" default="special://userdata/addon_data/plugin.video.abelhas/trackplayer" enable="!eq(-1,false)"/>
+	</category>
+	<category label="Bibliotecas">
 		<setting id="libraryfolder" type="folder" label="30147" default="special://userdata/addon_data/plugin.video.abelhas/Movies"/>
 		<setting id="tvshowlibraryfolder" type="folder" label="30148" default="special://userdata/addon_data/plugin.video.abelhas/TVshows"/>
 		<setting id="musicvideolibraryfolder" type="folder" label="30150" default="special://userdata/addon_data/plugin.video.abelhas/Musicvideos"/>

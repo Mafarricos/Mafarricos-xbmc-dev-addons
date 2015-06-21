@@ -724,7 +724,7 @@ def add_to_library_batch(type,updatelibrary=True):
 def ReplaceSpecialChar(name):
 	try: name = name.encode('utf-8')
 	except: pass
-	return name.replace('ç','c').replace('À','A').replace('Á','A').replace('á','a').replace('à','a').replace('ã','a').replace('É','E').replace('é','e').replace('ê','e').replace('ó','o').replace('ô','o').replace('õ','o').replace('í','i')
+	return name.replace('ç','c').replace('À','A').replace('Á','A').replace('á','a').replace('à','a').replace('ã','a').replace('É','E').replace('é','e').replace('ê','e').replace('ó','o').replace('ô','o').replace('õ','o').replace('í','i').replace('/','-')
 
 def add_to_library(name,url,type,updatelibrary=True): 
 	episode = ''

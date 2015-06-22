@@ -9,6 +9,11 @@ from resources.lib import internalPlayer
 h = HTMLParser.HTMLParser()
 net=Net()
 
+try:
+    import json
+except:
+    import simplejson as json
+
 ####################################################### CONSTANTES #####################################################
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
@@ -641,26 +646,52 @@ def comecarvideo(name,url,playterm,legendas=None):
 	title = name
 	if not playterm:
 		title='%s' % (name.split('[/B]')[0].replace('[B]',''))	
-		try:
-			tv = xbmc.getInfoLabel('ListItem.Art(tvshow.poster)')
-			if tv == "": content = 'movie'
-			else: content = 'episode'
 
-			if content == 'movie':
-				meta = {'title': xbmc.getInfoLabel('ListItem.title'), 'originaltitle': xbmc.getInfoLabel('ListItem.originaltitle'), 'year': xbmc.getInfoLabel('ListItem.year'), 'genre': xbmc.getInfoLabel('ListItem.genre'), 'studio' : xbmc.getInfoLabel('ListItem.studio'), 'country' : xbmc.getInfoLabel('ListItem.country'), 'duration' : xbmc.getInfoLabel('ListItem.duration'), 'rating': xbmc.getInfoLabel('ListItem.rating'), 'votes': xbmc.getInfoLabel('ListItem.votes'), 'mpaa': xbmc.getInfoLabel('ListItem.mpaa'), 'director': xbmc.getInfoLabel('ListItem.director'), 'writer': xbmc.getInfoLabel('ListItem.writer'), 'plot': xbmc.getInfoLabel('ListItem.plot'), 'plotoutline': xbmc.getInfoLabel('ListItem.plotoutline'), 'tagline': xbmc.getInfoLabel('ListItem.tagline')}
-				label, poster, thumb, fanart = xbmc.getInfoLabel('ListItem.label'), xbmc.getInfoLabel('ListItem.icon'), xbmc.getInfoLabel('ListItem.icon'), xbmc.getInfoLabel('ListItem.Property(Fanart_Image)')
+		try:
+			print "Testing Movie"
+			modtitle = title.replace (" ", "+")+".strm"
+			modtitle = modtitle.replace ("(", "%28")
+			modtitle = modtitle.replace (")", "%29")
+			meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter": {"field": "path", "operator": "contains", "value": "%s"}, "properties" : ["title", "originaltitle", "year", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "file"]}, "id": 1}' % title)
+			print str(meta)
+
+			meta = unicode(meta, 'utf-8', errors='ignore')
+			meta = json.loads(meta)['result']['movies']
+			selfmeta = [i for i in meta if i['file'].endswith(modtitle)][0]
+			meta = {'title': selfmeta['title'].encode('utf-8'), 'originaltitle': selfmeta['originaltitle'].encode('utf-8'), 'year': selfmeta['year'], 'genre': str(" / ".join(selfmeta['genre']).encode('utf-8')), 'studio' : str(" / ".join(selfmeta['studio']).encode('utf-8')), 'country' : str(" / ".join(selfmeta['country']).encode('utf-8')), 'duration' : selfmeta['runtime'], 'rating': selfmeta['rating'], 'votes': selfmeta['votes'], 'mpaa': selfmeta['mpaa'].encode('utf-8'), 'director': str(" / ".join(selfmeta['director']).encode('utf-8')), 'writer': str(" / ".join(selfmeta['writer']).encode('utf-8')), 'plot': selfmeta['plot'].encode('utf-8'), 'plotoutline': selfmeta['plotoutline'].encode('utf-8'), 'tagline': selfmeta['tagline'].encode('utf-8')}
 				
-			elif content == 'episode':
-				meta = {'title': xbmc.getInfoLabel('ListItem.title'), 'season' : xbmc.getInfoLabel('ListItem.season'), 'episode': xbmc.getInfoLabel('ListItem.episode'), 'tvshowtitle': xbmc.getInfoLabel('ListItem.tvshowtitle'), 'studio': xbmc.getInfoLabel('ListItem.studio'), 'premiered' : xbmc.getInfoLabel('ListItem.premiered'), 'duration' : xbmc.getInfoLabel('ListItem.duration'), 'rating': xbmc.getInfoLabel('ListItem.rating'), 'mpaa' : xbmc.getInfoLabel('ListItem.mpaa'), 'director': xbmc.getInfoLabel('ListItem.director'), 'writer': xbmc.getInfoLabel('ListItem.writer'), 'plot': xbmc.getInfoLabel('ListItem.plot')}
-				label, poster, thumb, fanart = xbmc.getInfoLabel('ListItem.label'), xbmc.getInfoLabel('ListItem.Art(tvshow.poster)'), xbmc.getInfoLabel('ListItem.icon'), xbmc.getInfoLabel('ListItem.Property(Fanart_Image)')
-			listitem = xbmcgui.ListItem(label, iconImage="DefaultVideo.png", thumbnailImage=thumb)		
-			try: listitem.setArt({'poster': poster, 'tvshow.poster': poster, 'season.poster': poster})
-			except: pass
-			listitem.setProperty("Fanart_Image", fanart)
-			listitem.setInfo(type="Video", infoLabels = meta)
-		except:
-			listitem.setInfo("Video", {"title":title})
-			listitem.setInfo("Music", {"title":title})
+			dbid = selfmeta['movieid']
+			thumb = selfmeta['thumbnail']
+			content='Movie'
+	 	except: 
+			try:
+				print "Testing TV"
+				modtitle = title.replace (" ", "+")+".strm"
+				season, episode = re.compile('.+?S(..)E(..)').findall(title)[0]
+				season, episode = '%01d' % int(season), '%01d' % int(episode)
+				meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "file"]}, "id": 1}' % (int(season), int(episode)))
+				print str(meta)
+			
+				meta = unicode(meta, 'utf-8', errors='ignore')
+				meta = json.loads(meta)['result']['episodes']
+				selfmeta = [i for i in meta if i['file'].endswith(modtitle)][0]
+				meta = {'title': selfmeta['title'].encode('utf-8'), 'season' : selfmeta['season'], 'episode': selfmeta['episode'], 'tvshowtitle': selfmeta['showtitle'].encode('utf-8'), 'premiered' : selfmeta['firstaired'], 'duration' : selfmeta['runtime'], 'rating': selfmeta['rating'], 'director': str(" / ".join(selfmeta['director']).encode('utf-8')), 'writer': str(" / ".join(selfmeta['writer']).encode('utf-8')), 'plot': selfmeta['plot'].encode('utf-8')}
+				
+				dbid = selfmeta['episodeid']
+				thumb = selfmeta['thumbnail']
+				poster = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter": {"field": "title", "operator": "is", "value": "%s"}, "properties": ["thumbnail"]}, "id": 1}' % selfmeta['showtitle'])
+				poster = unicode(poster, 'utf-8', errors='ignore')
+				poster = json.loads(poster)['result']['tvshows'][0]['thumbnail']
+	#			thumb = poster     # Uncomment to switch to TV Show Poster Instead of Episode Thumb 
+				content='TV'
+			except: 
+				meta=''
+				content=''
+				thumb=''
+				dbid=''
+		listitem = xbmcgui.ListItem(title, iconImage="DefaultVideo.png", thumbnailImage=thumb)
+	 	listitem.setInfo(type="Video", infoLabels = meta)
+
 	else:
 		listitem = xbmcgui.ListItem(title, iconImage="DefaultVideo.png", thumbnailImage="DefaultVideo.png")
 		listitem.setInfo("Video", {"title":title})
@@ -675,7 +706,7 @@ def comecarvideo(name,url,playterm,legendas=None):
 	if playterm <> 'playlist':		
 		  dialogWait.close()
 		  del dialogWait	  
-	xbmcPlayer = internalPlayer.Player(title=title)
+	xbmcPlayer = internalPlayer.Player(title=title,dbid=dbid,content=content)
 	if not playterm and playeractivo==0: xbmcPlayer.play(playlist, listitem)
 	if legendas!=None: xbmcPlayer.setSubtitles(legendas)
 	else:

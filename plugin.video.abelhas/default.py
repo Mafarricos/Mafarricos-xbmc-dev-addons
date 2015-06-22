@@ -726,7 +726,7 @@ def ReplaceSpecialChar(name):
 	except: pass
 	return name.replace('ç','c').replace('À','A').replace('Á','A').replace('á','a').replace('à','a').replace('ã','a').replace('É','E').replace('é','e').replace('ê','e').replace('ó','o').replace('ô','o').replace('õ','o').replace('í','i').replace('/','-')
 
-def add_to_library(name,url,type,updatelibrary=True): 
+def add_to_library(name,url,type,updatelibrary=True):
 	episode = ''
 	tvshow = ''
 	season = ''
@@ -734,10 +734,10 @@ def add_to_library(name,url,type,updatelibrary=True):
 	name2 = re.compile('\[B\]\[COLOR .+?\](.+?)\[/COLOR\]\[/B\]').findall(name)
 	if name2: 
 		name = ReplaceSpecialChar(h.unescape(name2[0]))
-		cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name[:-4])
+		cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ', name[:-4])
 	else:
 		name = ReplaceSpecialChar(h.unescape(name))
-		cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name)
+		cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ', name)
 	if type == 'movie': 
 		if not xbmcvfs.exists(moviesFolder): xbmcvfs.mkdir(moviesFolder)
 	elif type == 'tvshow': 
@@ -759,23 +759,35 @@ def add_to_library(name,url,type,updatelibrary=True):
 	elif type == 'tvshow':
 		if tvshow <> '':
 			file_folder1 = os.path.join(tvshowFolder,tvshow)
-			if not xbmcvfs.exists(file_folder1): xbmcvfs.mkdir(file_folder1)
-			file_folder = os.path.join(os.path.join(tvshowFolder,tvshow),'S'+season)
+			if not xbmcvfs.exists(file_folder1): tryFTPfolder(file_folder1)
+			file_folder = os.path.join(tvshowFolder,tvshow+'/','S'+season)
 			title =  tvshow + ' S'+season+'E'+episode
 		else:
 			if title == '': title = cleaned_title
 			tvshow,season,episode = GetTVShowNameResolved(title)
 			if tvshow <> '':
 				file_folder1 = os.path.join(tvshowFolder,tvshow)
-				if not xbmcvfs.exists(file_folder): xbmcvfs.mkdir(file_folder1)
-				file_folder = os.path.join(os.path.join(tvshowFolder,title),'S'+season)
+				if not xbmcvfs.exists(file_folder1): tryFTPfolder(file_folder1)
+				file_folder = os.path.join(tvshowFolder,title+'/','S'+season)
 				title =  tvshow + ' S'+season+'E'+episode
 			else: file_folder = os.path.join(tvshowFolder,title)
 	elif type == 'musicvideo': file_folder = musicvideoFolder
-	if not xbmcvfs.exists(file_folder): xbmcvfs.mkdir(file_folder)
+	if not xbmcvfs.exists(file_folder): tryFTPfolder(file_folder) 
 	strm_contents = 'plugin://plugin.video.abelhas/?url=' + url +'&mode=25&name=' + urllib.quote_plus(title)
 	savefile(urllib.quote_plus(title)+'.strm',strm_contents,file_folder)
 	if updatelibrary: xbmc.executebuiltin("XBMC.UpdateLibrary(video)")
+
+def tryFTPfolder(file_folder):
+	if 'ftp://' in file_folder:
+		try:
+			from ftplib import FTP		
+			ftparg = re.compile('ftp://(.+?):(.+?)@(.+?):(\d+)/(.+/?)').findall(file_folder)
+			ftp = FTP(ftparg[0][2],ftparg[0][0],ftparg[0][1])
+			try: ftp.cwd(ftparg[0][4])
+			except: ftp.mkd(ftparg[0][4])
+			ftp.quit()
+		except: print 'Nao conseguiu criar %s' % file_folder
+	else: xbmcvfs.mkdir(file_folder)
 
 def GetTVShowNameResolved(title):
 	episode = ''
@@ -784,7 +796,7 @@ def GetTVShowNameResolved(title):
 	epi = re.compile('(.+?)[ ]?[Ss]?(\d{1,2})[EeXx.](\d{1,2})').findall(title)
 	if epi:
 		for n,s,e in epi:
-			tvshow = n.strip().strip('-')
+			tvshow = n.replace('-','').strip()
 			season = s
 			if len(season) == 1 : season = '0'+season
 			episode = e
@@ -792,7 +804,7 @@ def GetTVShowNameResolved(title):
 	else: 
 		epi = re.compile('(.+?)[ \.]?Ep?(\d{1,3})').findall(title)
 		for n,e in epi:
-			tvshow = n.strip().strip('-')
+			tvshow = n.replace('-','').strip()
 			season = '01'
 			episode = e
 			if len(episode) == 1 : episode = '0'+episode

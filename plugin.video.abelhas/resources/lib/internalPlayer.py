@@ -51,12 +51,12 @@ class Player(xbmc.Player):
 		try: self.racio = self.time/self.totalTime
 		except: self.racio = 0.50
 		print 'self.racio %s' % (self.racio)
-		if (self.time/self.totalTime > 0.90):
+		if self.racio > 0.90:
 			self.onPlayBackEnded()
 			if track == 'true' and self.isPlayingVideo():
 				try: xbmcvfs.delete(self.filemedia)
 				except: pass
-		if (self.time/self.totalTime < 0.05):
+		if self.racio < 0.05:
 			try: xbmcvfs.delete(self.filemedia)
 			except: pass
 
@@ -68,7 +68,10 @@ class Player(xbmc.Player):
 			print "Marking Movie as watched"
 			xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % str(self.dbid))
 		xbmc.executebuiltin('Container.Refresh')
-		if (self.time/self.totalTime > 0.90):
+		try: self.racio = self.time/self.totalTime
+		except: self.racio = 0.50
+		print 'self.racio %s' % (self.racio)
+		if self.racio > 0.90:
 			if track == 'true': # and self.isPlayingVideo():
 				try: xbmcvfs.delete(self.filemedia)
 				except: pass

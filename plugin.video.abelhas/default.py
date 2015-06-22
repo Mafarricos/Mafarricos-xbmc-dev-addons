@@ -6,13 +6,10 @@
 import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time,xbmcvfs,HTMLParser
 from t0mm0.common.net import Net
 from resources.lib import internalPlayer
+try: import json
+except: import simplejson as json
 h = HTMLParser.HTMLParser()
 net=Net()
-
-try:
-    import json
-except:
-    import simplejson as json
 
 ####################################################### CONSTANTES #####################################################
 addon_id = 'plugin.video.abelhas'

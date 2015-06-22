@@ -22,6 +22,7 @@ class Player(xbmc.Player):
 		self.playing = True
 		self.time = 0
 		self.totalTime = 0
+		self.racio = 0
 		if track == 'true':
 			try: self.id = self.title
 			except: self.id = None
@@ -47,7 +48,9 @@ class Player(xbmc.Player):
 		print 'player Stop'
 		self.playing = False
 		time = int(self.time)
-		print 'self.time/self.totalTime='+str(self.time/self.totalTime)
+		try: self.racio = self.time/self.totalTime
+		except: self.racio = 0.50
+		print 'self.racio %s' % (self.racio)
 		if (self.time/self.totalTime > 0.90):
 			self.onPlayBackEnded()
 			if track == 'true' and self.isPlayingVideo():

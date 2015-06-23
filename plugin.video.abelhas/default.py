@@ -555,6 +555,8 @@ def paginas(link):
 
 ########################################################### PLAYER ################################################
 def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
+	final = ''
+	countloop = 0
 	sitebase,sitename,color,mode = returnValues(url)
 	host = sitebase.replace('http://','').replace('/','')
 	if playlistTitle == '': mensagemprogresso.create(sitename, traducao(40025))
@@ -570,7 +572,11 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
 		form_d = {'fileId':fileid,'__RequestVerificationToken':token}
 		ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://' + host, 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://'+host+'/','User-Agent':user_agent}
 		endlogin=sitebase + 'action/License/Download'
-		final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+		while final == '' and countloop <= 3:
+			try: final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+			except: pass
+			countloop = countloop + 1
+			print '###loop %s' % countloop
 		final=final.replace('\u0026','&').replace('\u003c','<').replace('\u003e','>').replace('\\','')
 	except: pass
 	try:

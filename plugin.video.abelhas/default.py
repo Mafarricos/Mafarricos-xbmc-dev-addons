@@ -576,7 +576,6 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
 			try: final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
 			except: pass
 			countloop = countloop + 1
-			print '###loop %s' % countloop
 		final=final.replace('\u0026','&').replace('\u003c','<').replace('\u003e','>').replace('\\','')
 	except: pass
 	try:
@@ -631,6 +630,8 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
 		else: comecarvideo(name,linkfinal,playterm=playterm)
 
 def comecarvideo(name,url,playterm,legendas=None):
+	content=''
+	dbid=''
 	if not playterm:
 		try: xbmc.Player().stop()
 		except: pass

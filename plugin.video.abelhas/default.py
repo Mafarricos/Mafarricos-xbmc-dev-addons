@@ -816,7 +816,7 @@ def tryFTPfolder(file_folder):
 	if 'ftp://' in file_folder:
 		try:
 			from ftplib import FTP		
-			ftparg = re.compile('ftp://(.+?):(.+?)@(.+?):(\d+)/(.+/?)').findall(file_folder)
+			ftparg = re.compile('ftp://(.+?):(.+?)@(.+?):?(\d+)?/(.+/?)').findall(file_folder)
 			ftp = FTP(ftparg[0][2],ftparg[0][0],ftparg[0][1])
 			try: ftp.cwd(ftparg[0][4])
 			except: ftp.mkd(ftparg[0][4])

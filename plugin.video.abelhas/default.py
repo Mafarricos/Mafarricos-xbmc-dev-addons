@@ -385,7 +385,8 @@ def ReturnConteudo(conteudo,past,color,url2,deFora):
 		urlficheiro = url[0]
 		if not img: thumb = GetThumbExt(extensao)
 		else: thumb = img[0]
-		tamanhoficheiro = size[0]
+		try: tamanhoficheiro = size[0]
+		except: tamanhoficheiro = 0
 		tamanhoficheiro=tamanhoficheiro.replace(' ','')
 		tamanhoparavariavel=' (' + tamanhoficheiro + ')'
 		if deFora: reslist = SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,4,thumb,reslist)

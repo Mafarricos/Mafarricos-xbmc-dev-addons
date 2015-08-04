@@ -1,0 +1,73 @@
+########################################################
+# VideoDevil Catcher list
+########################################################
+# title: str <- Start flag
+# target: RegEx <- Start flag
+# subs: RegEx
+# ext_subs: RegEx
+# subsurl: *%s*
+# ext_subsurl: *%s*
+# url: *%s*
+# data: *%s*
+# header str|str
+# limit: int
+# action: str
+# build: *%s*
+# ext_target: RegEx
+# ext_url: *%s*
+# ext_data: *%s*
+# ext_header str|str
+# ext_limit: int
+# ext_action: str
+# ext_build: *%s*
+# extension: str (default = flv)
+# info: str
+# quality: low, standard, high or fallback <- End flag
+########################################################
+# Catcher sites
+########################################################
+title=tuga.io
+target=file: '(.+?)',
+subs=file: "(.+?)",\s+default: "true"
+subsurl=http://tuga.io%s
+url=%s
+quality=high
+########################################################
+title=kids.tuga.io
+target=file: '(.+?)',
+subs=file: "(.+?)",\s+default: "true"
+subsurl=http://tuga.io%s
+url=%s
+quality=high
+########################################################
+title=gigatuga.com
+target=<iframe width="640" height="380" src="(.+?)" frameborder="0" allowfullscreen></iframe>
+info=gigatuga
+url=%s
+ext_target=file: "(.+?)",
+ext_url=%s
+quality=high
+target=data-mfp-src="(.+?).mp4"
+info=openload
+url=%s
+ext_target=<source type="video/mp4" src='(.+?)'>
+ext_url=%s
+ext_subs=<track kind="captions" src="(.+?)" srclang="pt" label="pt" default></track>
+ext_subsurl=http://openload.io%s
+quality=high
+target=data-mfp-src="(.+?)/"
+info=openload
+url=%s
+ext_target=<source type="video/mp4" src='(.+?)'>
+ext_url=%s
+ext_subs=<track kind="captions" src="(.+?)" srclang=".+?" label=".+?" default></track>
+ext_subsurl=http://openload.io%s
+quality=high
+########################################################
+title=tugaflix.com
+target=<iframe src="(.+?)"
+url=%s
+ext_target=<source type="video/mp4" src='(.+?)'>
+ext_url=%s
+quality=high
+########################################################

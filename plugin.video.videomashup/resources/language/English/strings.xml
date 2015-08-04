@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
-    <string id="30000">VideoDevil</string>
-    <string id="30001">XBMC Media Center</string>
+    <string id="30000">VideoMashUp</string>
+    <string id="30001">KODI Media Center</string>
 
     <string id="20191">Enable debug logging</string>
     <string id="30002">Disable disclaimer</string>
@@ -31,11 +31,7 @@
     <string id="30057">Standard quality</string>
     <string id="30058">High quality</string>
     <string id="30059">Update</string>
-    <string id="30060">VideoDevil has been successfully updated</string>
-    <string id="30061">WARNING :This plugin contains explicit adult material.</string>
-    <string id="30062">You may enter only if you are at least 18 years of age</string>
-    <string id="30063">or at least the legal age in the jurisdiction where</string>
-    <string id="30064">you reside or from which you access this content.</string>
+    <string id="30060">VideoMashUp has been successfully updated</string>
     <string id="30065">Exit</string>
     <string id="30066">Enter</string>
 

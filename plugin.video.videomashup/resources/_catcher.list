@@ -103,3 +103,13 @@ ext_subs=<track kind="captions" src="(.+?)" srclang="\w{2}" label="\w{2}" defaul
 ext_subsurl=http://openload.io%s
 quality=high
 ########################################################
+title=cinematugahd.net
+target=src=(.+?) frameborder
+url=%s
+ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
+ext_url=%s
+ext_build=https://openload.io/stream/%s
+ext_subs=<track kind="captions" src="(.+?)" srclang="pt" label="pt" default></track>
+ext_subsurl=http://openload.io%s
+quality=high
+########################################################

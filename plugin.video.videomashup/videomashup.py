@@ -231,7 +231,7 @@ class CCurrentList:
         item = None
         for root, dirs, files in os.walk(resDir):
             for listname in files:
-                if self.getFileExtension(listname) == 'list' and listname != 'catcher.list': item = self.getItemFromList(listname, name)
+                if self.getFileExtension(listname) == 'list' and listname != '_catcher.list': item = self.getItemFromList(listname, name)
                 if item != None: return item
         return None
 
@@ -301,7 +301,7 @@ class CCurrentList:
         return item
 
     def loadCatcher(self, title):
-        data = smart_read_file(resDir, 'catcher.list')
+        data = smart_read_file(resDir, '_catcher.list')
         del self.catcher[:]
         catcher_found = False
         for m in data:
@@ -659,7 +659,7 @@ class Main:
         global subtitles
         subtitles = ''
         orig_url = orig_url.replace('\r\n', '').replace('\n', '')
-        if 'tugahd' in orig_url:
+        if 'tugahd.com' in orig_url:
 			temppage = open_url(orig_url)
 			found = re.findall('src="/filmez/(.+?)"',temppage, re.DOTALL)
 			orig_url = 'http://www.tugahd.com/filmez/'+found[0]
@@ -959,6 +959,7 @@ class Main:
     def addListItem(self, title, url, icon, totalItems, lItem):
         try: title = h.unescape(title)
         except: pass
+        title = title.replace('&#8211;','-').replace('&#8220;','"').replace('&#8221;','"')
         # in Frodo url parameters need to be encoded
         # ignore characters that can't be converted to ascii
         quoted_url = urllib2.quote(url.encode('ascii', 'ignore'))
@@ -1019,7 +1020,7 @@ class Main:
                 if enable_debug: xbmc.log('###LOG### Purging cache directory')
                 self.purgeCache()
                 if enable_debug: xbmc.log('###LOG### Cache directory purged')
-                self.parseView('sites.list')
+                self.parseView('_sites.list')
                 del self.currentlist.items[:]
                 if enable_debug: xbmc.log('###LOG### End of directory')
                 xbmcplugin.endOfDirectory(handle = int(sys.argv[1]))

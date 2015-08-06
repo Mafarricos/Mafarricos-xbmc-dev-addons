@@ -1,5 +1,5 @@
 ########################################################
-# VideoDevil Catcher list
+# VideoMashup Catcher list
 ########################################################
 # title: str <- Start flag
 # target: RegEx <- Start flag
@@ -70,4 +70,7 @@ ext_target=file: '(.+?)',
 ext_url=%s
 quality=high
 ########################################################
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master

@@ -186,7 +186,7 @@ class CCurrentList:
     def __init__(self):
 		self.start = ''
 		self.player = ''
-		self.sort = 'label'
+		self.sort = ''
 		self.cfg = ''
 		self.skill = ''
 		self.reference = ''
@@ -505,7 +505,6 @@ class CCurrentList:
 					import requests
 					page = requests.get(curr_url)
 					data = page.text
-					print curl_url,data
 				except:
 					if enable_debug: traceback.print_exc(file = sys.stdout)
 					return
@@ -664,7 +663,6 @@ class Main:
 			temppage = open_url(orig_url)
 			found = re.findall('src="/filmez/(.+?)"',temppage, re.DOTALL)
 			orig_url = 'http://www.tugahd.com/filmez/'+found[0]
-        print 'orig_url',orig_url			
         self.videoExtension = '.mp4'
         for source in self.currentlist.catcher:
             if len(self.urlList) > 0 and source.quality == 'fallback': continue
@@ -936,7 +934,7 @@ class Main:
             return -2
         else: result = self.currentlist.loadRemote(lItem.infos_dict['url'], lItem = lItem)
 
-        xbmcplugin.addSortMethod(handle = self.handle, sortMethod = xbmcplugin.SORT_METHOD_LABEL)
+        #xbmcplugin.addSortMethod(handle = self.handle, sortMethod = xbmcplugin.SORT_METHOD_LABEL)
         if self.currentlist.sort.find('label') != -1: xbmcplugin.addSortMethod(handle = self.handle, sortMethod = xbmcplugin.SORT_METHOD_LABEL)
         if self.currentlist.sort.find('size') != -1: xbmcplugin.addSortMethod(handle = self.handle, sortMethod = xbmcplugin.SORT_METHOD_SIZE)
         if self.currentlist.sort.find('duration') != -1: xbmcplugin.addSortMethod(handle = self.handle, sortMethod = xbmcplugin.SORT_METHOD_DURATION)

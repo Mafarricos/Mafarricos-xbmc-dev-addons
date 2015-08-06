@@ -41,33 +41,33 @@ url=%s
 quality=high
 ########################################################
 title=gigatuga.com
-target=<iframe width="640" height="380" src="(.+?)" frameborder="0" allowfullscreen></iframe>
-info=gigatuga
-url=%s
-ext_target=file: "(.+?)",
-ext_url=%s
-quality=high
-target=data-mfp-src="(.+?).mp4"
+target=data-mfp-src="https://openload.io(.+?)"
 info=openload
 url=%s
-ext_target=<source type="video/mp4" src='(.+?)'>
+build=https://openload.io%s
+ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
 ext_url=%s
-ext_subs=<track kind="captions" src="(.+?)" srclang="pt" label="pt" default></track>
-ext_subsurl=http://openload.io%s
-quality=high
-target=data-mfp-src="(.+?)/"
-info=openload
-url=%s
-ext_target=<source type="video/mp4" src='(.+?)'>
-ext_url=%s
+ext_build=https://openload.io/stream/%s
 ext_subs=<track kind="captions" src="(.+?)" srclang=".+?" label=".+?" default></track>
 ext_subsurl=http://openload.io%s
 quality=high
 ########################################################
 title=tugaflix.com
-target=<iframe src="(.+?)"
+target=onclick="location.href='(.+?)'"><i class="fa fa-play-circle-o"></i>
 url=%s
-ext_target=<source type="video/mp4" src='(.+?)'>
+ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
+ext_url=%s
+ext_build=https://openload.io/stream/%s
+ext_subs=<track kind="captions" src="(.+?)" srclang=".+?" label=".+?" default></track>
+ext_subsurl=http://openload.io%s
+quality=high
+########################################################
+title=toppt.net
+target=data-mfp-src="http://videowood.tv/embed/(.+?)" data-mfp-type="iframe">
+url=%s
+build=http://videowood.tv/embed/%s
+ext_target=file: '(.+?)',
 ext_url=%s
 quality=high
 ########################################################
+

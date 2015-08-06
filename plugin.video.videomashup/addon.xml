@@ -5,7 +5,8 @@
   name="VideoMashUp"
   provider-name="Mafarricos">
   <requires>
-   <import addon="xbmc.python" version="2.1.0"/>
+	<import addon="xbmc.python" version="2.14.0"/>
+	<import addon="script.module.requests" version="2.4.3"/>
   </requires>
   <extension 
     point="xbmc.python.pluginsource"

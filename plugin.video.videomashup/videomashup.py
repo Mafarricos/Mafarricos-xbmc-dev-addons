@@ -8,6 +8,8 @@ import re
 import xbmc, xbmcgui
 import os, traceback
 import cookielib, htmlentitydefs
+import HTMLParser
+h = HTMLParser.HTMLParser()
 
 addon = xbmcaddon.Addon(id='plugin.video.videomashup')
 __language__ = addon.getLocalizedString
@@ -495,11 +497,18 @@ class CCurrentList:
                 f.write('<Title>'+ curr_url + '</Title>\n\n')
             curr_url = urllib.unquote_plus(curr_url)
             req = Request(curr_url, None, txheaders)
-            try: handle = urlopen(req)
+            try: 
+				handle = urlopen(req)
+				data = handle.read()
             except:
-                if enable_debug: traceback.print_exc(file = sys.stdout)
-                return
-            data = handle.read()
+				try:
+					import requests
+					page = requests.get(curr_url)
+					data = page.text
+					print curl_url,data
+				except:
+					if enable_debug: traceback.print_exc(file = sys.stdout)
+					return
             #cj.save(os.path.join(resDir, 'cookies.lwp'), ignore_discard=True)
             try: cj.save(cookiePath)
             except ValueError:
@@ -544,6 +553,7 @@ class CCurrentList:
                         info_rule = info.rule
                         if info.rule.find('%s') != -1:
                             src = tmp.infos_dict[info.src]
+                            info_rule = info.rule % (smart_unicode(src))
                             info_rule = info.rule % (smart_unicode(src))
                         infosearch = re.search(info_rule, data)
                         if infosearch:
@@ -853,7 +863,6 @@ class Main:
                         dialog = xbmcgui.Dialog()
                         dialog.ok('VideoMashUp Info', __language__(30053))
         else: flv_file = None
-        #print '$$aki',subtitlepath.encode("utf-8")
         if flv_file != None and os.path.isfile(flv_file):
             if enable_debug: xbmc.log('###LOG### Play: ' + str(flv_file))
             xbmc.Player().play(str(flv_file), listitem)
@@ -945,6 +954,8 @@ class Main:
         return result
 
     def addListItem(self, title, url, icon, totalItems, lItem):
+        try: title = h.unescape(title)
+        except: pass
         # in Frodo url parameters need to be encoded
         # ignore characters that can't be converted to ascii
         quoted_url = urllib2.quote(url.encode('ascii', 'ignore'))

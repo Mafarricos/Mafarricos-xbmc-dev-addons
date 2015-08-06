@@ -660,6 +660,11 @@ class Main:
         global subtitles
         subtitles = ''
         orig_url = orig_url.replace('\r\n', '').replace('\n', '')
+        if 'tugahd' in orig_url:
+			temppage = open_url(orig_url)
+			found = re.findall('src="/filmez/(.+?)"',temppage, re.DOTALL)
+			orig_url = 'http://www.tugahd.com/filmez/'+found[0]
+        print 'orig_url',orig_url			
         self.videoExtension = '.mp4'
         for source in self.currentlist.catcher:
             if len(self.urlList) > 0 and source.quality == 'fallback': continue

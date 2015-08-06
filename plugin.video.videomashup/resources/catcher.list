@@ -48,7 +48,7 @@ build=https://openload.io%s
 ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
 ext_url=%s
 ext_build=https://openload.io/stream/%s
-ext_subs=<track kind="captions" src="(.+?)" srclang=".+?" label=".+?" default></track>
+ext_subs=<track kind="captions" src="(.+?)" srclang="\w{2}" label="\w{2}" default></track>
 ext_subsurl=http://openload.io%s
 quality=high
 ########################################################
@@ -58,7 +58,7 @@ url=%s
 ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
 ext_url=%s
 ext_build=https://openload.io/stream/%s
-ext_subs=<track kind="captions" src="(.+?)" srclang=".+?" label=".+?" default></track>
+ext_subs=<track kind="captions" src="(.+?)" srclang="\w{2}" label="\w{2}" default></track>
 ext_subsurl=http://openload.io%s
 quality=high
 ########################################################
@@ -68,5 +68,38 @@ url=%s
 build=http://videowood.tv/embed/%s
 ext_target=file: '(.+?)',
 ext_url=%s
+ext_subs=addSubtitles\('(.+?)', '', false\);
+quality=high
+########################################################
+title=redcouch.me
+target=<iframe src="(.+?)"
+info=openload
+url=%s
+ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
+ext_url=%s
+ext_build=https://openload.io/stream/%s
+ext_subs=<track kind="captions" src="(.+?)" srclang="\w{2}" label="\w{2}" default></track>
+ext_subsurl=http://openload.io%s
+quality=high
+########################################################
+title=tugatorrent.net
+target=<iframe src="https://openload.io(.+?)"
+url=%s
+build=https://openload.io%s
+ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
+ext_url=%s
+ext_build=https://openload.io/stream/%s
+ext_subs=<track kind="captions" src="(.+?)" srclang="\w{2}" label="\w{2}" default></track>
+ext_subsurl=http://openload.io%s
+quality=high
+########################################################
+title=tugahd.com
+target=<iframe src="(.+?)"
+url=%s
+ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
+ext_url=%s
+ext_build=https://openload.io/stream/%s
+ext_subs=<track kind="captions" src="(.+?)" srclang="\w{2}" label="\w{2}" default></track>
+ext_subsurl=http://openload.io%s
 quality=high
 ########################################################

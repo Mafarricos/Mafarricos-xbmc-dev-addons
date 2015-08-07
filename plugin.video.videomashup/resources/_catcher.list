@@ -51,6 +51,15 @@ ext_build=https://openload.io/stream/%s
 ext_subs=<track kind="captions" src="(.+?)" srclang="\w{2}" label="\w{2}" default></track>
 ext_subsurl=http://openload.io%s
 quality=high
+target=data-mfp-src="http://videomega.tv(.+?)"
+url=%s
+build=http://videomega.tv%s
+info=videomega
+ext_target=<source src="(.+?)" type="video/mp4"/>
+ext_url=%s
+ext_subs=<track kind="captions" src="(.+?)"
+ext_subsurl=%s
+quality=high
 ########################################################
 title=tugaflix.com
 target=onclick="location.href='(.+?)'"><i class="fa fa-play-circle-o"></i>
@@ -65,10 +74,38 @@ quality=high
 title=toppt.net
 target=data-mfp-src="http://videowood.tv/embed/(.+?)" data-mfp-type="iframe">
 url=%s
+info=videowood
 build=http://videowood.tv/embed/%s
 ext_target=file: '(.+?)',
 ext_url=%s
 ext_subs=addSubtitles\('(.+?)', '', false\);
+quality=high
+target=data-mfp-src="http://videomega.tv(.+?)"
+url=%s
+build=http://videomega.tv%s
+info=videomega
+ext_target=<source src="(.+?)" type="video/mp4"/>
+ext_url=%s
+ext_subs=<track kind="captions" src="(.+?)"
+ext_subsurl=%s
+quality=high
+target=data-mfp-src="http://vidto.me/(.+?)"
+url=%s
+build=http://vidto.me/%s
+info=vidto
+ext_target=<source src="(.+?)" type="video/mp4"/>
+ext_url=%s
+ext_subs=<track kind="captions" src="(.+?)"
+ext_subsurl=%s
+quality=high
+target=data-mfp-src="http://vidzi.tv/(.+?)"
+url=%s
+build=http://vidzi.tv/%s
+info=vidzi
+ext_target=file: "(.+?)"
+ext_url=%s
+ext_subs=tracks: \[\{file: "(.+?)"
+ext_subsurl=%s
 quality=high
 ########################################################
 title=redcouch.me
@@ -104,12 +141,50 @@ ext_subsurl=http://openload.io%s
 quality=high
 ########################################################
 title=cinematugahd.net
-target=src=(.+?) frameborder
+target=src=https://openload.io(.+?) frameborder
 url=%s
+build=https://openload.io%s
+info=openload
 ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
 ext_url=%s
 ext_build=https://openload.io/stream/%s
-ext_subs=<track kind="captions" src="(.+?)" srclang="pt" label="pt" default></track>
+ext_subs=<track kind="captions" src="(.+?)"
 ext_subsurl=http://openload.io%s
+quality=high
+target=src=http://videomega.tv(.+?) frameborder
+url=%s
+build=http://videomega.tv%s
+info=videomega
+ext_target=<source src="(.+?)" type="video/mp4"/>
+ext_url=%s
+ext_subs=<track kind="captions" src="(.+?)"
+ext_subsurl=%s
+quality=high
+########################################################
+title=tuga-filmes.com
+target=<iframe src="http://videowood.tv/embed/(.+?)"
+url=%s
+info=videowood
+build=http://videowood.tv/embed/%s
+ext_target=file: '(.+?)',
+ext_url=%s
+ext_subs=addSubtitles\('(.+?)', '', false\);
+quality=high
+target=<a href="http://www.videowood.tv/video/(.+?)"
+url=%s
+info=videowood
+build=http://videowood.tv/embed/%s
+ext_target=file: '(.+?)',
+ext_url=%s
+ext_subs=addSubtitles\('(.+?)', '', false\);
+quality=high
+target=src="http://videomega.tv/(.+?)"
+url=%s
+build=http://videomega.tv%s
+info=videomega
+ext_target=<source src="(.+?)" type="video/mp4"/>
+ext_url=%s
+ext_subs=<track kind="captions" src="(.+?)"
+ext_subsurl=%s
 quality=high
 ########################################################

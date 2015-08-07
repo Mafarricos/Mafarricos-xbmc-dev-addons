@@ -32,7 +32,7 @@ subtitlepath = xbmc.translatePath('special://temp/')
 subtitlepath = os.path.join(subtitlepath, 'TemporarySubs.pt.srt')
 try: os.remove(subtitlepath)
 except: pass
-		
+
 if cj != None:
     if os.path.isfile(xbmc.translatePath(cookiePath)):
         try: cj.load(xbmc.translatePath(cookiePath))
@@ -656,6 +656,7 @@ class Main:
         self.run()
 
     def getDirectLink(self, orig_url):
+        if enable_debug: xbmc.log("###LOG### orig_url %s" % orig_url) 	
         global subtitles
         subtitles = ''
         orig_url = orig_url.replace('\r\n', '').replace('\n', '')
@@ -669,23 +670,43 @@ class Main:
             if source.rule.url != '':
                 if source.rule.data == '':
                     url = source.rule.url % orig_url
-                    req = Request(url)
-                    req.add_header('User-Agent', USERAGENT)
-                    if source.rule.reference != '': req.add_header(source.rule.reference, source.rule.content)
-                    try: urlfile = opener.open(req)
-                    except Exception:
-                        xbmc.log("###LOG### Failed: " % url)
-                        raise
-                    if source.rule.limit == 0: fc = urlfile.read()
-                    else: fc = urlfile.read(source.rule.limit)
+                    if 'videomega' in url:
+						from modules.resolvers import videomega
+						fc = videomega.resolve(url)
+                    elif 'vidto' in url:
+						from modules.resolvers import vidto
+						source.match = vidto.resolve(url)
+                    elif 'vidzi' in url:
+						from modules.resolvers import vidzi
+						fc = vidzi.resolve(url)
+                    else:
+						req = Request(url)
+						req.add_header('User-Agent', USERAGENT)
+						if source.rule.reference != '': req.add_header(source.rule.reference, source.rule.content)
+						try: urlfile = opener.open(req)
+						except Exception:
+							xbmc.log("###LOG### Failed: %s" % url)
+							raise
+						if source.rule.limit == 0: fc = urlfile.read()
+						else: fc = urlfile.read(source.rule.limit)
                 else:
                     data = source.rule.data % orig_url
-                    req = Request(source.rule.url, data)
-                    req.add_header('User-Agent', USERAGENT)
-                    if source.rule.reference != '': req.add_header(source.rule.reference, source.rule.content)
-                    response = urlopen(req)
-                    if source.rule.limit == 0: fc = response.read()
-                    else: fc = response.read(source.rule.limit)
+                    if 'videomega' in url:
+						from modules.resolvers import videomega
+						fc = videomega.resolve(data)
+                    elif 'vidto' in url:
+						from modules.resolvers import vidto
+						source.match = vidto.resolve(url)
+                    elif 'vidzi' in url:
+						from modules.resolvers import vidzi
+						fc = vidzi.resolve(url)						
+                    else:			
+						req = Request(source.rule.url, data)
+						req.add_header('User-Agent', USERAGENT)
+						if source.rule.reference != '': req.add_header(source.rule.reference, source.rule.content)
+						response = urlopen(req)
+						if source.rule.limit == 0: fc = response.read()
+						else: fc = response.read(source.rule.limit)
                 if enable_debug:
                     f = open(os.path.join(cacheDir, 'catcher.html'), 'w')
                     f.write('<Title>'+ orig_url + '</Title>\n\n')
@@ -714,24 +735,44 @@ class Main:
                     if source.ext_rule.data == '':
                         if source.ext_rule.url.find('%s') != -1: ext_url = source.ext_rule.url % match
                         else: ext_url = match
-                        ext_req = Request(ext_url)
-                        ext_req.add_header('User-Agent', USERAGENT)
-                        if source.ext_rule.reference != '': ext_req.add_header(source.ext_rule.reference, source.ext_rule.content)
-                        try: ext_urlfile = opener.open(ext_req)
-                        except urllib2.HTTPError as e:
-                            if enable_debug: xbmc.log('###LOG### Failed %s %s' % (e, ext_req.get_full_url()))
-                            raise
-                        if source.ext_rule.limit == 0: ext_fc = ext_urlfile.read()
-                        else: ext_fc = ext_urlfile.read(source.ext_rule.limit)
+                        if 'videomega' in ext_url:
+							from modules.resolvers import videomega
+							ext_fc = videomega.resolve(ext_url)
+                        elif 'vidto' in ext_url:
+							from modules.resolvers import vidto
+							source.match = vidto.resolve(ext_url)
+                        elif 'vidzi' in ext_url:
+							from modules.resolvers import vidzi
+							ext_fc = vidzi.resolve(ext_url)
+                        else:
+							ext_req = Request(ext_url)
+							ext_req.add_header('User-Agent', USERAGENT)
+							if source.ext_rule.reference != '': ext_req.add_header(source.ext_rule.reference, source.ext_rule.content)
+							try: ext_urlfile = opener.open(ext_req)
+							except urllib2.HTTPError as e:
+								if enable_debug: xbmc.log('###LOG### Failed %s %s' % (e, ext_req.get_full_url()))
+								raise
+							if source.ext_rule.limit == 0: ext_fc = ext_urlfile.read()
+							else: ext_fc = ext_urlfile.read(source.ext_rule.limit)
                     else:
                         ext_data = source.ext_rule.data % match
-                        ext_req = Request(source.ext_rule.url, ext_data)
-                        ext_req.add_header('User-Agent', USERAGENT)
-                        if source.ext_rule.reference != '': ext_req.add_header(source.ext_rule.reference, source.ext_rule.content)
-                        ext_response = urlopen(ext_req)
-                        ext_fc = ext_response.read()
-                        if source.ext_rule.limit == 0: ext_fc = ext_response.read()
-                        else: ext_fc = ext_response.read(source.ext_rule.limit)
+                        if 'videomega' in ext_url:
+							from modules.resolvers import videomega
+							ext_fc = videomega.resolve(ext_url)
+                        elif 'vidto' in ext_url:
+							from modules.resolvers import vidto
+							source.match = vidto.resolve(ext_url)
+                        elif 'vidzi' in ext_url:
+							from modules.resolvers import vidzi
+							ext_fc = vidzi.resolve(ext_url)
+                        else:			
+							ext_req = Request(source.ext_rule.url, ext_data)
+							ext_req.add_header('User-Agent', USERAGENT)
+							if source.ext_rule.reference != '': ext_req.add_header(source.ext_rule.reference, source.ext_rule.content)
+							ext_response = urlopen(ext_req)
+							ext_fc = ext_response.read()
+							if source.ext_rule.limit == 0: ext_fc = ext_response.read()
+							else: ext_fc = ext_response.read(source.ext_rule.limit)
                     if enable_debug:
                         f = open(os.path.join(cacheDir, 'ext_catcher.html'), 'w')
                         f.write('<Title>'+ match + '</Title>\n\n')
@@ -872,7 +913,7 @@ class Main:
         else:
             if enable_debug: xbmc.log('###LOG### Play: ' + str(url))
             xbmc.Player().play(str(url), listitem)
-        xbmc.sleep(1000)
+        xbmc.sleep(2000)
         if os.path.isfile(subtitlepath): xbmc.Player().setSubtitles(subtitlepath.encode("utf-8"))
         xbmc.sleep(200)
 

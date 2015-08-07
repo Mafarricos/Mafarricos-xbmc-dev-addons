@@ -31,7 +31,6 @@ def resolve(url):
         url = 'http://vidto.me/embed-%s.html' % url
 
         result = client.request(url)
-        print result
         result = re.compile('(eval.*?\)\)\))').findall(result)[-1]
         result = re.sub(r'(\',\d*,\d*,)', r';\1', result)
         url = jsunpack.unpack(result)

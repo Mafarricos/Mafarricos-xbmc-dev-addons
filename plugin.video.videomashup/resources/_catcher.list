@@ -41,15 +41,14 @@ url=%s
 quality=high
 ########################################################
 title=gigatuga.com
-target=data-mfp-src="https://openload.io(.+?)"
+target=data-mfp-src="https://openload.co(.+?)"
 info=openload
 url=%s
-build=https://openload.io%s
-ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
+build=https://openload.co%s
+ext_target=<source type="video/mp4" src="(.+?)">
 ext_url=%s
-ext_build=https://openload.io/stream/%s
-ext_subs=<track kind="captions" src="(.+?)" srclang="\w{2}" label="\w{2}" default></track>
-ext_subsurl=http://openload.io%s
+ext_subs=<track kind="captions" src="(.+?)"
+ext_subsurl=http://openload.co%s
 quality=high
 target=data-mfp-src="http://videomega.tv(.+?)"
 url=%s
@@ -64,11 +63,10 @@ quality=high
 title=tugaflix.com
 target=onclick="location.href='(.+?)'"><i class="fa fa-play-circle-o"></i>
 url=%s
-ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
+ext_target=<source type="video/mp4" src="(.+?)">
 ext_url=%s
-ext_build=https://openload.io/stream/%s
 ext_subs=<track kind="captions" src="(.+?)" srclang="\w{2}" label="\w{2}" default></track>
-ext_subsurl=http://openload.io%s
+ext_subsurl=http://openload.co%s
 quality=high
 ########################################################
 title=toppt.net
@@ -112,44 +110,42 @@ title=redcouch.me
 target=<iframe src="(.+?)"
 info=openload
 url=%s
-ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
+build=https://openload.co%s
+info=openload
+ext_target=<source type="video/mp4" src="(.+?)">
 ext_url=%s
-ext_build=https://openload.io/stream/%s
-ext_subs=<track kind="captions" src="(.+?)" srclang="\w{2}" label="\w{2}" default></track>
-ext_subsurl=http://openload.io%s
+ext_subs=<track kind="captions" src="(.+?)"
+ext_subsurl=http://openload.co%s
 quality=high
 ########################################################
 title=tugatorrent.net
-target=<iframe src="https://openload.io(.+?)"
+target=<iframe src="https://openload.co(.+?)"
 url=%s
-build=https://openload.io%s
-ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
+build=https://openload.co%s
+ext_target=<source type="video/mp4" src="(.+?)">
 ext_url=%s
-ext_build=https://openload.io/stream/%s
 ext_subs=<track kind="captions" src="(.+?)" srclang="\w{2}" label="\w{2}" default></track>
-ext_subsurl=http://openload.io%s
+ext_subsurl=http://openload.co%s
 quality=high
 ########################################################
 title=tugahd.com
 target=<iframe src="(.+?)"
 url=%s
-ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
+ext_target=<source type="video/mp4" src="(.+?)">
 ext_url=%s
-ext_build=https://openload.io/stream/%s
 ext_subs=<track kind="captions" src="(.+?)" srclang="\w{2}" label="\w{2}" default></track>
-ext_subsurl=http://openload.io%s
+ext_subsurl=http://openload.co%s
 quality=high
 ########################################################
 title=cinematugahd.net
-target=src=https://openload.io(.+?) frameborder
+target=src=https://openload.co(.+?) frameborder
 url=%s
-build=https://openload.io%s
+build=https://openload.co%s
 info=openload
-ext_target="https:\\/\\/openload.io\\/stream\\/(.+?)"
+ext_target=<source type="video/mp4" src="(.+?)">
 ext_url=%s
-ext_build=https://openload.io/stream/%s
 ext_subs=<track kind="captions" src="(.+?)"
-ext_subsurl=http://openload.io%s
+ext_subsurl=http://openload.co%s
 quality=high
 target=src=http://videomega.tv(.+?) frameborder
 url=%s

@@ -19,18 +19,24 @@
     </extension>
 </addon>
 
-<addon id="plugin.video.cinecartaz" name="Cinecartaz" version="0.0.1" provider-name="Mafarricos">
-	<requires>
-    <import addon="xbmc.python" version="2.14.0"/>
+<addon
+  id="plugin.video.videomashup"
+  version="0.1"
+  name="VideoMashUp"
+  provider-name="Mafarricos">
+  <requires>
+	<import addon="xbmc.python" version="2.14.0"/>
+	<import addon="script.module.requests" version="2.4.3"/>
   </requires>
-  <extension point="xbmc.python.pluginsource" library="main.py">
-    <provides>video</provides>
+  <extension
+    point="xbmc.python.pluginsource"
+    library="default.py">
+   <provides>video</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
-    <language>Pt</language>
-    <platform>all</platform>
-    <summary lang="en">cinecartaz</summary>
-    <description lang="en">cinecartaz</description>
+    <summary>Play videos from different portuguese streaming sites</summary>
+    <description>This addon plays videos from tuga.io</description>
+    <disclaimer>The author does not host or distribute any of the content displayed by this addon. The author does not have any affiliation with the content provider.</disclaimer>
     <platform>all</platform>
   </extension>
 </addon>

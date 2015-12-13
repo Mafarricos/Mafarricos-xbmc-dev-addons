@@ -1,3 +1,7 @@
+1.1.1.002
+- Cookies fix
+- fix quantity of context menu
+
 [B]v1.1.0-beta010 (20 de Junho de 2015):[/B]
 - add videoclips to library
 

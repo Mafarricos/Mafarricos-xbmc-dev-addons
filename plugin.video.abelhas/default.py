@@ -65,7 +65,7 @@ def login(defora=False):
 			mensagemok(label[x],traducao(40003))
 			entrarnovamente(1)
 			selfAddon.setSetting(label[x]+'-check',"false")
-		elif re.search(username[x],logintest):
+		elif re.search('"LoggedIn":true',logintest):
 			net.save_cookies(cookies)
 			selfAddon.setSetting(label[x]+'-check',"true")
 		elif re.search('Erro',logintest) or link=='Erro':
@@ -750,7 +750,13 @@ def legendas(moviefileid,url):
       legendas=analyzer(url,subtitles='sim')
       return legendas
 
-def add_to_library_batch(type,updatelibrary=True):
+def add_to_library_batch(updatelibrary=True):
+	source = xbmcgui.Dialog().select
+	selectlist = ["Filmes","Séries","Videoclips"]
+	optionlist = ['movie', 'tvshow', 'musicvideo']
+	choose=source('Tipo',selectlist)
+	if choose > -1:	type = optionlist[choose]
+	else: sys.exit(0)
 	conteudo = openfile('playlist.txt')
 	playlistsearch=re.compile("\['(.+?)', '(.+?)'\]").findall(conteudo)
 	for titulo,url in playlistsearch: 
@@ -761,6 +767,15 @@ def ReplaceSpecialChar(name):
 	try: name = name.encode('utf-8')
 	except: pass
 	return name.replace('ç','c').replace('À','A').replace('Á','A').replace('á','a').replace('à','a').replace('ã','a').replace('É','E').replace('é','e').replace('ê','e').replace('ó','o').replace('ô','o').replace('õ','o').replace('í','i').replace('/','-')
+
+def add_to_library_opt(name,url,updatelibrary=True):
+	source = xbmcgui.Dialog().select
+	selectlist = ["Filmes","Séries","Videoclips"]
+	optionlist = ['movie', 'tvshow', 'musicvideo']
+	choose=source('Tipo',selectlist)
+	if choose > -1:	type = optionlist[choose]
+	else: sys.exit(0)
+	add_to_library(name,url,type,False)
 
 def add_to_library(name,url,type,updatelibrary=True):
 	episode = ''
@@ -881,11 +896,7 @@ def addCont(name,url,mode,tamanho,iconimage,total,pasta=False,atalhos=False):
 	contexto.append((traducao(40046), 'XBMC.RunPlugin(%s?mode=13&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
 	contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
 	contexto.append((traducao(40051), 'XBMC.RunPlugin(%s?mode=26&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
-	contexto.append((traducao(40052), 'XBMC.RunPlugin(%s?mode=29&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
-	contexto.append((traducao(40054), 'XBMC.RunPlugin(%s?mode=32&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
-	contexto.append((traducao(40051)+' - Batch', 'XBMC.RunPlugin(%s?mode=31&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
-	contexto.append((traducao(40052)+' - Batch', 'XBMC.RunPlugin(%s?mode=30&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
-	contexto.append((traducao(40054)+' - Batch', 'XBMC.RunPlugin(%s?mode=33&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
+	contexto.append((traducao(40051)+' - Batch', 'XBMC.RunPlugin(%s?mode=30&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
 	contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
 	if atalhos==False: contexto.append(('Adicionar atalho', 'RunPlugin(%s?mode=19&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
 	else: contexto.append(('Remover atalho', 'RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),atalhos)))
@@ -1116,12 +1127,8 @@ elif mode==22: pastas('/'.join(url.split('/')[:-1]),name)
 elif mode==23: pastas_de_fora(url,name)
 elif mode==24: proxpesquisa_mt()
 elif mode==25: play_from_outside(name,url)
-elif mode==26: add_to_library(name,url,'movie')
+elif mode==26: add_to_library_opt(name,url)
 elif mode==27: proxpesquisa_lb()
 elif mode==28: proxpesquisa_tb()
-elif mode==29: add_to_library(name,url,'tvshow')
-elif mode==30: add_to_library_batch('tvshow')
-elif mode==31: add_to_library_batch('movie')
-elif mode==32: add_to_library(name,url,'musicvideo')
-elif mode==33: add_to_library_batch('musicvideo')
+elif mode==30: add_to_library_batch()
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

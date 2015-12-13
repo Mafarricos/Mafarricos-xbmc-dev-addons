@@ -53,10 +53,8 @@
 	<string id="40048">A Playlist está limpa</string>
 	<string id="40049">A Criar Playlist</string>
 	<string id="40050">Criar Playlist</string>
-	<string id="40051">Adicionar à Biblioteca (Filmes)</string>
-	<string id="40052">Adicionar à Biblioteca (Séries)</string>
+	<string id="40051">Adicionar à Biblioteca</string>
 	<string id="40053">Criar pasta com o nome:</string>
-	<string id="40054">Adicionar à Biblioteca (Videos de Música)</string>
 	<string id="30140">Legendas</string>
 	<string id="30141">As legendas podem não estar disponíveis ou estarem dessincronizadas.</string>
 	<string id="30142">Utilizar legendas próprias nesse caso.</string>
